@@ -39,6 +39,9 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.7'
     implementation 'com.acmerobotics.roadrunner:core:1.0.0-beta1'
     implementation 'com.acmerobotics.roadrunner:actions:1.0.0-beta1'
+    //implementation 'com.acmerobotics.roadrunner:core:0.5.6'
+
+    implementation 'org.ejml:ejml-all:0.41.1'
 
     implementation 'org.ftclib.ftclib:core:2.1.1'
     // the following is optional if you want vision
