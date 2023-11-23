@@ -19,8 +19,8 @@ public class SimpleTeleOp extends LinearOpMode
         DcMotor motorFrontRight = hardwareMap.dcMotor.get(MecanumDrive.rightFrontName);
         DcMotor motorBackRight = hardwareMap.dcMotor.get(MecanumDrive.rightRearName);
 
-        motorBackRight.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorFrontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorBackLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorFrontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
 
@@ -33,9 +33,9 @@ public class SimpleTeleOp extends LinearOpMode
             //double x = gamepad1.left_stick_x;
             //double rx = gamepad1.right_stick_x;
 
-            double y = gamepad1.left_stick_y;
+            double y = -gamepad1.left_stick_y;
             double x = gamepad1.left_stick_x;
-            double rx = -gamepad1.right_stick_x;
+            double rx = gamepad1.right_stick_x;
 
 
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);

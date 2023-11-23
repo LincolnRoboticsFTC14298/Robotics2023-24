@@ -126,18 +126,18 @@ class OdometryLocalizer(
     }
 
     companion object {
-        const val leftEncoderName = "leftEncoder" // Must be port 0 and 3
+        const val leftEncoderName = MecanumDrive.rightFrontName // Must be port 0 and 3
         const val rightEncoderName = MecanumDrive.rightRearName // Must be port 0 and 3
-        const val perpendicularEncoderName = "frontEncoder" // port 1 or 2
+        const val perpendicularEncoderName = MecanumDrive.leftRearName // port 1 or 2
 
         @JvmField
         var X_MULTIPLIER = 1.0 // TODO multipliers for each individual encoder
         @JvmField
         var Y_MULTIPLIER = 1.0
         @JvmField
-        var LATERAL_DISTANCE = 12.0 // in; distance between the left and right wheels
+        var LATERAL_DISTANCE = 15.0 // in; distance between the left and right wheels
         @JvmField
-        var FORWARD_OFFSET = 12.5 / 2.0 // in; offset of the lateral wheel
+        var FORWARD_OFFSET = 13.0 / 2.0 // in; offset of the lateral wheel
 
         @JvmField
         var PAR0_Y_TICKS = -9664.594625447902

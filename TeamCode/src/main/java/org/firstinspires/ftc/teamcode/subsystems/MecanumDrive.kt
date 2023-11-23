@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
+import android.util.Log
 import com.acmerobotics.dashboard.canvas.Canvas
 import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket
@@ -8,6 +9,7 @@ import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
 import com.qualcomm.robotcore.hardware.*
+import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.util.*
@@ -18,7 +20,7 @@ import kotlin.math.sqrt
 
 
 @Config
-class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Localizer, val voltageSensor: VoltageSensor) : SubsystemBase() {
+class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Localizer, val voltageSensor: VoltageSensor, var telemetry: Telemetry? = null) : SubsystemBase() {
     private val kinematics = MecanumKinematics(
         IN_PER_TICK * TRACK_WIDTH_TICKS,
         LATERAL_MULTIPLIER //IN_PER_TICK / LATERAL_IN_PER_TICK
@@ -180,11 +182,15 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         val wheelVels: MecanumKinematics.WheelVelocities<Time> =
             kinematics.inverse(Twist2dDual.constant(vels, 1))
 
+        Log.i("input", vels.toString())
+        telemetry?.addData("leftFront", DualNum.constant<Time>(wheelVels.leftFront[0], 2)[1])
+        telemetry?.update()
+
         val voltage = voltageSensor.voltage
-        leftFront.power = feedforward.compute(wheelVels.leftFront) / voltage
-        leftBack.power = feedforward.compute(wheelVels.leftBack) / voltage
-        rightBack.power = feedforward.compute(wheelVels.rightBack) / voltage
-        rightFront.power = feedforward.compute(wheelVels.rightFront) / voltage
+        leftFront.power = feedforward.compute(DualNum.constant(wheelVels.leftFront[0], 2)) / voltage
+        leftBack.power = feedforward.compute(DualNum.constant(wheelVels.leftBack[0], 2)) / voltage
+        rightBack.power = feedforward.compute(DualNum.constant(wheelVels.rightBack[0], 2)) / voltage
+        rightFront.power = feedforward.compute(DualNum.constant(wheelVels.rightFront[0], 2)) / voltage
     }
 
     fun setDrivePowers(powers: Twist2d) {
@@ -454,9 +460,9 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
         const val TICKS_PER_REV = 537.6
         const val MAX_RPM = 312.0
-        var WHEEL_RADIUS = 1.9685 // in
+        var WHEEL_RADIUS = 1.889765 // in
         var GEAR_RATIO = 1.0 // output (wheel) speed / input (motor) speed
-        var TRACK_WIDTH = 12.5 // in
+        var TRACK_WIDTH = 15.5 // in
 
         // drive model parameters
         @JvmField
@@ -478,7 +484,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
         // path profile parameters
         @JvmField
-        var MAX_WHEEL_VEL = MAX_RPM / 60.0 * GEAR_RATIO * WHEEL_RADIUS * 2 * Math.PI * 0.85
+        var MAX_WHEEL_VEL = (MAX_RPM / 60.0) * GEAR_RATIO * WHEEL_RADIUS * 2 * Math.PI * 0.85
         @JvmField
         var MIN_PROFILE_ACCEL = -30.0
         @JvmField
