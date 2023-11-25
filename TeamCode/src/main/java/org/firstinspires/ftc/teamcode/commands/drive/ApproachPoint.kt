@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands.drive
 
 import com.acmerobotics.roadrunner.Pose2d
-import com.acmerobotics.roadrunner.Twist2d
+import com.acmerobotics.roadrunner.PoseVelocity2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
@@ -20,7 +20,7 @@ class ApproachPoint(
     mecanum: MecanumDrive,
     targetPoint: () -> Vector2d?,
     offsetPose: Pose2d = Pose2d(0.0, 0.0, 0.0),
-    input: () -> Twist2d,
+    input: () -> PoseVelocity2d,
     maxTolerableDistance: Double = 1.0, // in
     maxTolerableAngleDifference: Double = 0.05 // radians
 ) : SequentialCommandGroup() {

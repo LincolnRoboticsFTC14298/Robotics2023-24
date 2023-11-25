@@ -22,7 +22,7 @@ fun vectorToMatrix(vector: Vector2d) =
     SimpleMatrix(arrayOf(doubleArrayOf(vector.x, vector.y))).transpose()
 
 fun poseToMatrix(pose: Pose2d) =
-    SimpleMatrix(arrayOf(doubleArrayOf(pose.trans.x, pose.trans.y, pose.rot.log()))).transpose()
+    SimpleMatrix(arrayOf(doubleArrayOf(pose.position.x, pose.position.y, pose.heading.log()))).transpose()
 
 
 fun matrixToVector(matrix: SimpleMatrix) =

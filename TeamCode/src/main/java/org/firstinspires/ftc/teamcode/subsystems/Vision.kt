@@ -358,7 +358,7 @@ class Vision(
     }
 
     private fun drawObservationResult(canvas: Canvas, observation: ObservationResult, pose: Pose2d, radius: Double, fill: Boolean = true) {
-        val (x, y) = pose.trans.plus(pose.rot.inverse().times(observation.toVector()))
+        val (x, y) = pose.position.plus(pose.heading.inverse().times(observation.toVector()))
         if (fill) canvas.fillCircle(x, y, radius)
         else canvas.strokeCircle(x, y, radius)
     }

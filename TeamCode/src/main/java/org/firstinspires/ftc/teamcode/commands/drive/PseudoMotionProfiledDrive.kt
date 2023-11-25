@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.commands.drive
 
 import android.util.Log
-import com.acmerobotics.roadrunner.Twist2d
+import com.acmerobotics.roadrunner.PoseVelocity2d
 import com.arcrobotics.ftclib.command.CommandBase
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.robotcore.external.Telemetry
@@ -16,7 +16,7 @@ import kotlin.math.sqrt
  */
 class PseudoMotionProfiledDrive(
     private val mecanum: MecanumDrive,
-    private val input: () -> Twist2d,
+    private val input: () -> PoseVelocity2d,
     private val isInputVelocityNormalized: Boolean,
     private val isInputRotationNormalized: Boolean,
     private val distanceFromTarget: () -> Double = { Double.MAX_VALUE },
@@ -32,11 +32,11 @@ class PseudoMotionProfiledDrive(
     }
 
     override fun execute() {
-        val currentVel = mecanum.robotVelRobot.transVel.norm()
+        val currentVel = mecanum.robotVelRobot.linearVel.norm()
 
         var desiredInput = input.invoke()
-        if (isInputVelocityNormalized) desiredInput = Twist2d(desiredInput.transVel * MecanumDrive.MAX_WHEEL_VEL, desiredInput.rotVel)
-        if (isInputRotationNormalized) desiredInput = Twist2d(desiredInput.transVel, desiredInput.rotVel * MecanumDrive.MAX_ANG_VEL)
+        if (isInputVelocityNormalized) desiredInput = PoseVelocity2d(desiredInput.linearVel * MecanumDrive.MAX_WHEEL_VEL, desiredInput.angVel)
+        if (isInputRotationNormalized) desiredInput = PoseVelocity2d(desiredInput.linearVel, desiredInput.angVel * MecanumDrive.MAX_ANG_VEL)
 
         // Get the time from the last loop
         val dt = timer.seconds()
@@ -49,30 +49,30 @@ class PseudoMotionProfiledDrive(
         val minVelFromLast = currentVel + MecanumDrive.MIN_PROFILE_ACCEL * dt
 
         // Choose the minimum possible speed and obtain the max of the physically possible velocity
-        val velocity = max(minVelFromLast, minOf(maxVelFromLast, desiredInput.transVel.norm(), maxVelToStop))
+        val velocity = max(minVelFromLast, minOf(maxVelFromLast, desiredInput.linearVel.norm(), maxVelToStop))
 
         //TODO maybe change to min(maxrot with accel, maxvel) to prevent maxRotFromLast from exceeding MAX_ANG_VEL?
-        val maxRotFromLast = mecanum.robotVelRobot.rotVel + MecanumDrive.MAX_ANG_ACCEL * dt
-        val minRotFromLast = mecanum.robotVelRobot.rotVel - MecanumDrive.MAX_ANG_ACCEL * dt
+        val maxRotFromLast = mecanum.robotVelRobot.angVel + MecanumDrive.MAX_ANG_ACCEL * dt
+        val minRotFromLast = mecanum.robotVelRobot.angVel - MecanumDrive.MAX_ANG_ACCEL * dt
 
-        val desiredRotVel = desiredInput.rotVel * MecanumDrive.MAX_ANG_VEL
-        val immediateVelOffsetCorrection = (desiredRotVel - mecanum.robotVelRobot.rotVel)
+        val desiredRotVel = desiredInput.angVel * MecanumDrive.MAX_ANG_VEL
+        val immediateVelOffsetCorrection = (desiredRotVel - mecanum.robotVelRobot.angVel)
 
-        //val rotation = max(minRotFromLast, min(maxRotFromLast, desiredInput.rotVel)) // May cause issues w/ [ApproachRelativePoint] and [ApproachAngle]
+        //val rotation = max(minRotFromLast, min(maxRotFromLast, desiredInput.angVel)) // May cause issues w/ [ApproachRelativePoint] and [ApproachAngle]
         val rotation = max(minRotFromLast, min(maxRotFromLast, immediateVelOffsetCorrection)) // May cause issues w/ [ApproachRelativePoint] and [ApproachAngle]
 
-        //telemetry?.addData("setDriveSignal", Twist2d(desiredInput.transVel.normalize() * velocity, rotation))
+        //telemetry?.addData("setDriveSignal", PoseVelocity2d(desiredInput.linearVel.normalize() * velocity, rotation))
         //telemetry?.update()
 
         Log.i("dt-------------------", dt.toString())
         Log.i("desiredRotVel", desiredRotVel.toString())
         Log.i("immediateVelOffsetCorrection", immediateVelOffsetCorrection.toString())
         Log.i("minRotFromLast", minRotFromLast.toString())
-        Log.i("robotVelRobot.rotVel", mecanum.robotVelRobot.rotVel.toString())
+        Log.i("robotVelRobot.angVel", mecanum.robotVelRobot.angVel.toString())
         Log.i("maxRotFromLast", maxRotFromLast.toString())
         Log.i("rotation", rotation.toString())
 
-        mecanum.setDriveSignal(Twist2d(desiredInput.transVel.normalize() * velocity, rotation))
+        mecanum.setDriveSignal(PoseVelocity2d(desiredInput.linearVel.normalize() * velocity, rotation))
         timer.reset()
     }
 

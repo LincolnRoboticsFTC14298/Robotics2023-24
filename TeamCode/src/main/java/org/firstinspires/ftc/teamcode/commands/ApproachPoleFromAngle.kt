@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands
 
-import com.acmerobotics.roadrunner.Twist2d
+import com.acmerobotics.roadrunner.PoseVelocity2d
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
 import org.firstinspires.ftc.teamcode.commands.drive.ApproachAngle
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision
 class ApproachPoleFromAngle(
     mecanum: MecanumDrive,
     vision: Vision,
-    input: () -> Twist2d
+    input: () -> PoseVelocity2d
 ) : SequentialCommandGroup() {
 
     init {

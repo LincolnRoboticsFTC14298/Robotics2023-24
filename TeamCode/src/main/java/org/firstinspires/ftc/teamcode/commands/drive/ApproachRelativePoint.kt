@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.commands.drive
 
 import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.Rotation2d
-import com.acmerobotics.roadrunner.Twist2d
+import com.acmerobotics.roadrunner.PoseVelocity2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.ParallelDeadlineGroup
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
@@ -26,7 +26,7 @@ class ApproachRelativePoint(
     private val mecanum: MecanumDrive,
     private val targetPoint: () -> Vector2d?,
     private val offsetPose: Pose2d = Pose2d(0.0, 0.0, 0.0),
-    private val input: () -> Twist2d,
+    private val input: () -> PoseVelocity2d,
     private val maxTolerableDistance: Double = 1.0, // in
     private val maxTolerableAngleDifference: Double = 0.05 // radians
 ) : SequentialCommandGroup() {
@@ -37,11 +37,11 @@ class ApproachRelativePoint(
         controller.setInputBounds(-Math.PI, Math.PI)
 
         // Target position is the heading of the offset.
-        controller.targetPosition = offsetPose.rot.log()
+        controller.targetPosition = offsetPose.heading.log()
 
         val difference = {
             lastTargetAngleSeen = targetPoint.invoke() ?: lastTargetAngleSeen // Spooky ahhh code
-            lastTargetAngleSeen - offsetPose.trans
+            lastTargetAngleSeen - offsetPose.position
         }
 
         val distance = { difference.invoke().norm() }
@@ -53,13 +53,13 @@ class ApproachRelativePoint(
             // Feedforward
             // When the local input is perpendicular to difference, full feedforward is added, when its parallel, the dot product is zero and so no feedforward is done
             // TODO Check
-            val thetaFF = -(Rotation2d.exp(-Math.PI / 2) * input.invoke().transVel).dot(diff) / (diff.norm() * diff.norm()) / MecanumDrive.kV
+            val thetaFF = -(Rotation2d.exp(-Math.PI / 2) * input.invoke().linearVel).dot(diff) / (diff.norm() * diff.norm()) / MecanumDrive.kV
 
             // Set desired angular velocity to the heading controller output + angular
             // velocity feedforward
             val rot = -controller.update(diff.angleCast().log()) + thetaFF
 
-            Twist2d(input.invoke().transVel, rot)
+            PoseVelocity2d(input.invoke().linearVel, rot)
         }
 
         addCommands(

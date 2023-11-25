@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands.drive
 
-import com.acmerobotics.roadrunner.Twist2d
+import com.acmerobotics.roadrunner.PoseVelocity2d
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
  */
 class MotionProfiledJoystickDrive(
     mecanum: MecanumDrive,
-    input: () -> Twist2d,
+    input: () -> PoseVelocity2d,
     fieldCentric: () -> Boolean,
     obstacleAvoidance: () -> Boolean = {false},
     var telemetry: Telemetry? = null

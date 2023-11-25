@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems.localization
 import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.roadrunner.DualNum
 import com.acmerobotics.roadrunner.Time
-import com.acmerobotics.roadrunner.Twist2dIncrDual
+import com.acmerobotics.roadrunner.Twist2dDual
 import com.acmerobotics.roadrunner.Vector2dDual
 import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.hardware.HardwareMap
@@ -43,12 +43,12 @@ class OdometryLocalizer(
     var currPar1PosVel: PositionVelocityPair = par1.positionAndVelocity
     var currPerpPosVel: PositionVelocityPair = perp.positionAndVelocity
 
-    fun getIncr(par0PosVel: PositionVelocityPair, par1PosVel: PositionVelocityPair, perpPosVel: PositionVelocityPair): Twist2dIncrDual<Time> {
+    fun getIncr(par0PosVel: PositionVelocityPair, par1PosVel: PositionVelocityPair, perpPosVel: PositionVelocityPair): Twist2dDual<Time> {
         val par0PosDelta = par0PosVel.position - lastPar0Pos
         val par1PosDelta = par1PosVel.position - lastPar1Pos
         val perpPosDelta = perpPosVel.position - lastPerpPos
 
-        val twistIncr = Twist2dIncrDual(
+        val twistIncr = Twist2dDual(
             Vector2dDual(
                 DualNum<Time>(
                     listOf(
@@ -77,7 +77,7 @@ class OdometryLocalizer(
     /**
      * Only used for normal localizer
      */
-    override fun updateAndGetIncr(): Twist2dIncrDual<Time> {
+    override fun updateAndGetIncr(): Twist2dDual<Time> {
         updateReadings()
         return getIncr(currPar0PosVel, currPar1PosVel, currPerpPosVel)
     }

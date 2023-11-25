@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.teleops
 
 import com.acmerobotics.roadrunner.Pose2d
-import com.acmerobotics.roadrunner.Twist2d
+import com.acmerobotics.roadrunner.PoseVelocity2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.*
 import com.arcrobotics.ftclib.command.button.Trigger
@@ -35,7 +35,7 @@ class BasicTeleOp : CommandOpMode() {
         /**
          * Drive
          */
-        val input = { Twist2d(Vector2d(driver1.leftY, -driver1.leftX), -driver1.rightX) }
+        val input = { PoseVelocity2d(Vector2d(driver1.leftY, -driver1.leftX), -driver1.rightX) }
 
         var fieldCentric = false
 

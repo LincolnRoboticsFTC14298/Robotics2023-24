@@ -23,7 +23,7 @@ class MecanumMonteCarloLocalizer(
             return Pose2d(state[0], state[1], state[2])
         }
 
-    override var robotVelRobot: Twist2d = Twist2d(Vector2d(0.0, 0.0), 0.0)
+    override var robotVelRobot: PoseVelocity2d = PoseVelocity2d(Vector2d(0.0, 0.0), 0.0)
         get() = odometryLocalizer.getVelocity()
 
 

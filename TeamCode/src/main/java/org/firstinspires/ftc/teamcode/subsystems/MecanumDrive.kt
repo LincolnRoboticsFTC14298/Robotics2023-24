@@ -45,7 +45,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
     val imu: IMU
 
-    var robotVelRobot: Twist2d = Twist2d(Vector2d(0.0, 0.0), 0.0)
+    var robotVelRobot: PoseVelocity2d = PoseVelocity2d(Vector2d(0.0, 0.0), 0.0)
 
     private val poseHistory = LinkedList<Pose2d>()
 
@@ -76,7 +76,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             lastHeading = Rotation2d.exp(imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS))
         }
 
-        override fun updateAndGetIncr(): Twist2dIncrDual<Time> {
+        override fun updateAndGetIncr(): Twist2dDual<Time> {
             val leftFrontPosVel = leftFront.positionAndVelocity
             val leftRearPosVel = leftRear.positionAndVelocity
             val rightRearPosVel = rightRear.positionAndVelocity
@@ -121,9 +121,9 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
             lastHeading = heading
 
-            return Twist2dIncrDual(
+            return Twist2dDual(
                 transIncr,
-                rotIncr.drop(1).addFront(headingDelta)
+                DualNum.cons(headingDelta, rotIncr.drop(1))
             )
         }
     }
@@ -178,9 +178,9 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 //        HEADING_VEL_GAIN = smartDamp(HEADING_GAIN)
     }
 
-    fun setDriveSignal(vels: Twist2d) {
+    fun setDriveSignal(vels: PoseVelocity2d) {
         val wheelVels: MecanumKinematics.WheelVelocities<Time> =
-            kinematics.inverse(Twist2dDual.constant(vels, 1))
+            kinematics.inverse(PoseVelocity2dDual.constant(vels, 1))
 
         Log.i("input", vels.toString())
         telemetry?.addData("leftFront", DualNum.constant<Time>(wheelVels.leftFront[0], 2)[1])
@@ -193,10 +193,10 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         rightFront.power = feedforward.compute(DualNum.constant(wheelVels.rightFront[0], 2)) / voltage
     }
 
-    fun setDrivePowers(powers: Twist2d) {
+    fun setDrivePowers(powers: PoseVelocity2d) {
         val wheelVels: MecanumKinematics.WheelVelocities<Time> =
             MecanumKinematics(1.0)
-                .inverse(Twist2dDual.constant(powers, 1))
+                .inverse(PoseVelocity2dDual.constant(powers, 1))
 
         var maxPowerMag = 1.0
         for (power in wheelVels.all()) {
@@ -215,8 +215,8 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
      * @return Gets the pole the robot is facing by minimizing the difference of heading.
      */
     fun getFacingPole(): FieldConfig.Pole {
-        val headVec = pose.rot.vec()
-        val posVec = pose.trans
+        val headVec = pose.heading.vec()
+        val posVec = pose.position
 
         /*
         val minX = floor(posVec.x / RobotConfig.tileSize)
@@ -254,8 +254,8 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
     fun getClosestPoleOfType(poleType: FieldConfig.PoleType): FieldConfig.Pole {
         val poles = FieldConfig.Pole.getPolesOfType(poleType)
 
-        val headVec = pose.rot.vec()
-        val posVec = pose.trans
+        val headVec = pose.heading.vec()
+        val posVec = pose.position
 
         return poles.maxBy {
             val diff = it.vector.minus(posVec)
@@ -318,15 +318,15 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             rightBack.power = feedforward.compute(wheelVels.rightBack) / voltage
             rightFront.power = feedforward.compute(wheelVels.rightFront) / voltage
 
-            p.put("command x", command.value().transVel.x)
-            p.put("command y", command.value().transVel.y)
-            p.put("command rot", command.value().rotVel)
+            p.put("command x", command.value().linearVel.x)
+            p.put("command y", command.value().linearVel.y)
+            p.put("command rot", command.value().angVel)
 
             LogFiles.recordTargetPose(txWorldTarget.value())
 
-            p.put("x", pose.trans.x)
-            p.put("y", pose.trans.y)
-            p.put("heading (deg)", Math.toDegrees(pose.rot.log()))
+            p.put("x", pose.position.x)
+            p.put("y", pose.position.y)
+            p.put("heading (deg)", Math.toDegrees(pose.heading.log()))
 
             val (trans, rot) = txWorldTarget.value().minusExp(pose)
             p.put("xError", trans.x)
@@ -405,14 +405,14 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             drawRobot(c, pose)
 
             c.setStroke("#7C4DFFFF")
-            c.fillCircle(turn.beginPose.trans.x, turn.beginPose.trans.y, 2.0)
+            c.fillCircle(turn.beginPose.position.x, turn.beginPose.position.y, 2.0)
 
             return true
         }
 
         override fun preview(c: Canvas) {
             c.setStroke("#7C4DFF7A")
-            c.fillCircle(turn.beginPose.trans.x, turn.beginPose.trans.y, 2.0)
+            c.fillCircle(turn.beginPose.position.x, turn.beginPose.position.y, 2.0)
         }
     }
 
@@ -422,10 +422,12 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             { t: TimeTrajectory -> FollowTrajectoryAction(t) },
             beginPose,
             1e-6,
+            0.0, //TODO New parameter, find correct value
             defaultTurnConstraints,
             defaultVelConstraint,
             defaultAccelConstraint,
-            0.25
+            0.25,
+            0.25 //TODO New parameter, find correct value
         )
     }
 
@@ -445,9 +447,9 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
     fun drawRobot(c: Canvas, t: Pose2d = pose) {
         c.setStrokeWidth(1)
-        c.strokeCircle(t.trans.x, t.trans.y, TRACK_WIDTH/2.0)
-        val halfv = t.rot.vec().times(0.25 * TRACK_WIDTH)
-        val p1 = t.trans.plus(halfv)
+        c.strokeCircle(t.position.x, t.position.y, TRACK_WIDTH/2.0)
+        val halfv = t.heading.vec().times(0.25 * TRACK_WIDTH)
+        val p1 = t.position.plus(halfv)
         val (x, y) = p1.plus(halfv)
         c.strokeLine(p1.x, p1.y, x, y)
     }
