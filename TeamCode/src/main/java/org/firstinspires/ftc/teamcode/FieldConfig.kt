@@ -10,6 +10,12 @@ object FieldConfig {
     const val poleDiameter = 1.0 // in TODO measure
     const val poleBaseHeight = 3.0 //in TODO measure
 
+    const val backdropAprilTagHeight = 2.0 //in
+    const val audienceSmallAprilTagHeight = 2.0 //in
+    const val audienceBigAprilTagHeight = 5.0 //in
+
+
+
     /**
      * Different types of poles. Height in inches.
      */

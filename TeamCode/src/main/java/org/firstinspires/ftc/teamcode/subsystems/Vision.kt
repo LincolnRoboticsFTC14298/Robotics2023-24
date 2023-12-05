@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
+import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.FieldConfig
@@ -29,6 +30,14 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
+/*
+we can use muiltiple cameras
+TODO Research veiwportContainerIds
+TODO Create different pipelines for apriltag, *pixels, spike mark
+TODO add april tag data to fieldConfig/cameraConfig
+DONE see if we can put apriltag on team prop for spike mark scoring. if not, pipeline to detect white pixel
+No apriltags on team prop
+ */
 
 
 /**
@@ -54,9 +63,19 @@ class Vision(
     private val dashboard = FtcDashboard.getInstance()
 
     enum class AprilTagResult(var id: Int) {
-        PARK_LEFT(5),
-        PARK_MIDDLE(15),
-        PARK_RIGHT(9);
+        BACKDROP_LEFT_BLUE(1),
+        BACKDROP_MIDDLE_BLUE(2),
+        BACKDROP_RIGHT_BLUE(3),
+
+        BACKDROP_LEFT_RED(4),
+        BACKDROP_MIDDLE_RED(5),
+        BACKDROP_RIGHT_RED(6),
+
+        AUDIENCE_WALL_BIG_BLUE(10),
+        AUDIENCE_WALL_SMALL_BLUE(9),
+
+        AUDIENCE_WALL_BIG_RED(7),
+        AUDIENCE_WALL_SMALL_RED(8);
 
         companion object {
             fun find(id: Int): AprilTagResult? = AprilTagResult.values().find { it.id == id }
@@ -64,7 +83,7 @@ class Vision(
     }
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
-        APRIL_TAG(AprilTagDetectionPipeline(1.18,  CameraData.LOGITECH_C920)),
+        APRIL_TAG(AprilTagDetectionPipeline(telemetry)),
         GENERAL_PIPELINE(GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, null))
     }
 
@@ -231,6 +250,8 @@ class Vision(
 
         return landmarks
     }
+
+
 
     fun getLandmarkInfo(): List<ObservationResult> = getCameraSpaceLandmarkInfo().map{ it + CameraData.LOGITECH_C920.relativePosition }
 

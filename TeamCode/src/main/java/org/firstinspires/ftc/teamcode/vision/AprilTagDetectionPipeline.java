@@ -21,8 +21,12 @@
 
 package org.firstinspires.ftc.teamcode.vision;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.FieldConfig;
-import org.firstinspires.ftc.teamcode.subsystems.Vision;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -36,7 +40,6 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.apriltag.AprilTagDetectorJNI;
 import org.openftc.easyopencv.OpenCvPipeline;
-
 import java.util.ArrayList;
 
 public class AprilTagDetectionPipeline extends OpenCvPipeline
@@ -69,7 +72,7 @@ public class AprilTagDetectionPipeline extends OpenCvPipeline
     private boolean needToSetDecimation;
     private final Object decimationSync = new Object();
 
-    public AprilTagDetectionPipeline(double tagsize, double fx, double fy, double cx, double cy)
+    public AprilTagDetectionPipeline(double tagsize, double fx, double fy, double cx, double cy, Telemetry telemetry)
     {
         this.tagsize = tagsize;
         this.tagsizeX = tagsize;
@@ -78,6 +81,7 @@ public class AprilTagDetectionPipeline extends OpenCvPipeline
         this.fy = fy;
         this.cx = cx;
         this.cy = cy;
+        this.telemetry = telemetry;
 
         constructMatrix();
 
@@ -85,15 +89,35 @@ public class AprilTagDetectionPipeline extends OpenCvPipeline
         nativeApriltagPtr = AprilTagDetectorJNI.createApriltagDetector(AprilTagDetectorJNI.TagFamily.TAG_36h11.string, 3, 3);
     }
 
-    public AprilTagDetectionPipeline(double tagsize, Vision.Companion.CameraData camera)
+
+    Telemetry telemetry;
+    static final double FEET_PER_METER = 3.28084;
+    public AprilTagDetectionPipeline(Telemetry telemetry)
     {
-        this.tagsize = tagsize;
-        this.tagsizeX = tagsize;
-        this.tagsizeY = tagsize;
-        this.fx = camera.getFx();
-        this.fy = camera.getFy();
-        this.cx = camera.getCx();
-        this.cy = camera.getCy();
+        this.tagsize = 2;
+        this.tagsizeX = 2;
+        this.tagsizeY = 2;
+        this.fx = 477.73045982;//1.43057579e+03;
+        this.fy = 479.24207234;//1.43401563e+03;
+        this.cx = 311.48519892;//9.33013966e+02;
+        this.cy = 176.10784813;//5.28831106e+02;
+        this.telemetry = telemetry;
+
+        constructMatrix();
+
+        // Allocate a native context object. See the corresponding deletion in the finalizer
+        nativeApriltagPtr = AprilTagDetectorJNI.createApriltagDetector(AprilTagDetectorJNI.TagFamily.TAG_36h11.string, 3, 3);
+    }
+
+    public AprilTagDetectionPipeline()
+    {
+        this.tagsize = 2;
+        this.tagsizeX = 2;
+        this.tagsizeY = 2;
+        this.fx = 477.73045982;//1.43057579e+03;
+        this.fy = 479.24207234;//1.43401563e+03;
+        this.cx = 311.48519892;//9.33013966e+02;
+        this.cy = 176.10784813;//5.28831106e+02;
 
         constructMatrix();
 
@@ -147,7 +171,20 @@ public class AprilTagDetectionPipeline extends OpenCvPipeline
             Pose pose = poseFromTrapezoid(detection.corners, cameraMatrix, tagsizeX, tagsizeY);
             drawAxisMarker(input, tagsizeY/2.0, 6, pose.rvec, pose.tvec, cameraMatrix);
             draw3dCubeMarker(input, tagsizeX, tagsizeX, tagsizeY, 5, pose.rvec, pose.tvec, cameraMatrix);
+
+            Orientation rot = Orientation.getOrientation(detection.pose.R, AxesReference.INTRINSIC, AxesOrder.YXZ, AngleUnit.DEGREES);
+
+            telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id));
+            telemetry.addLine(String.format("Translation X: %.2f in", detection.pose.x));
+            telemetry.addLine(String.format("Translation Y: %.2f in", detection.pose.y));
+            telemetry.addLine(String.format("Translation Z: %.2f in", detection.pose.z));
+
+            telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", rot.firstAngle));
+            telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", rot.secondAngle));
+            telemetry.addLine(String.format("Rotation Roll: %.2f degrees", rot.thirdAngle));
         }
+
+        telemetry.update();
 
         return input;
     }
@@ -304,6 +341,9 @@ public class AprilTagDetectionPipeline extends OpenCvPipeline
         Calib3d.solvePnP(points3d, points2d, cameraMatrix, new MatOfDouble(), pose.rvec, pose.tvec, false);
 
         return pose;
+    }
+
+    public void init() {
     }
 
     /*
