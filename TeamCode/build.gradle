@@ -56,7 +56,6 @@ dependencies {
     implementation 'org.ftclib.ftclib:vision:2.1.0'
 
     implementation 'org.openftc:apriltag:2.0.0'
-    implementation 'androidx.core:core-ktx:+'
 
     annotationProcessor files('lib/OpModeAnnotationProcessor.jar')
 }

@@ -83,7 +83,7 @@ class Vision(
     }
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
-        APRIL_TAG(AprilTagDetectionPipeline(telemetry)),
+        APRIL_TAG(AprilTagDetectionPipeline(CameraData.LOGITECH_C920 ,telemetry)),
         GENERAL_PIPELINE(GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, null))
     }
 
@@ -209,6 +209,7 @@ class Vision(
     data class ObservationResult(val angle: Double, val distance: Double) {
 
         companion object {
+
             fun fromVector(vector: Vector2d) : ObservationResult {
                return ObservationResult(vector.angleCast().log(), vector.norm())
             }
@@ -392,7 +393,7 @@ class Vision(
             ),
             LOGITECH_C920(Math.toRadians(5.05), 5.44, Vector2d(4.5, 0.0),
                 Math.toRadians(70.42),
-                Math.toRadians(43.3), 1.44943054e+3, 1.44934063e+3, 9.37759430e+2, 5.34866814e+2, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695)
+                Math.toRadians(43.3), 477.73045982, 479.24207234, 311.48519892, 176.10784813, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695)
             );
 
             fun getCameraMatrix(): Mat {

@@ -27,6 +27,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.FieldConfig;
+import org.firstinspires.ftc.teamcode.subsystems.Vision;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -101,6 +102,23 @@ public class AprilTagDetectionPipeline extends OpenCvPipeline
         this.fy = 479.24207234;//1.43401563e+03;
         this.cx = 311.48519892;//9.33013966e+02;
         this.cy = 176.10784813;//5.28831106e+02;
+        this.telemetry = telemetry;
+
+        constructMatrix();
+
+        // Allocate a native context object. See the corresponding deletion in the finalizer
+        nativeApriltagPtr = AprilTagDetectorJNI.createApriltagDetector(AprilTagDetectorJNI.TagFamily.TAG_36h11.string, 3, 3);
+    }
+
+    public AprilTagDetectionPipeline(Vision.Companion.CameraData cameraData, Telemetry telemetry)
+    {
+        this.tagsize = 2;
+        this.tagsizeX = 2;
+        this.tagsizeY = 2;
+        this.fx = cameraData.getFx();//1.43057579e+03;
+        this.fy = cameraData.getFy();//1.43401563e+03;
+        this.cx = cameraData.getCx();//9.33013966e+02;
+        this.cy = cameraData.getCy();//5.28831106e+02;
         this.telemetry = telemetry;
 
         constructMatrix();
