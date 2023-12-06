@@ -126,9 +126,9 @@ class OdometryLocalizer(
     }
 
     companion object {
-        const val leftEncoderName = MecanumDrive.rightFrontName // Must be port 0 and 3
-        const val rightEncoderName = MecanumDrive.rightRearName // Must be port 0 and 3
-        const val perpendicularEncoderName = MecanumDrive.leftRearName // port 1 or 2
+        const val leftEncoderName = MecanumDrive.leftRearName // Must be port 0 and 3
+        const val rightEncoderName = MecanumDrive.leftFrontName // Must be port 0 and 3
+        const val perpendicularEncoderName = MecanumDrive.rightFrontName // port 1 or 2
 
         @JvmField
         var X_MULTIPLIER = 1.0 // TODO multipliers for each individual encoder

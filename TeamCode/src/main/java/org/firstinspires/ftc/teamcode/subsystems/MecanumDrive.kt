@@ -468,7 +468,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
         // drive model parameters
         @JvmField
-        var IN_PER_TICK = 72.0 / 135426.0
+        var IN_PER_TICK = 90.0 / 171923.0 //72.0 / 135426.0
         @JvmField
         var LATERAL_IN_PER_TICK = IN_PER_TICK
         @JvmField
@@ -478,9 +478,9 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
         // feedforward parameters
         @JvmField
-        var kS = 1.3704012088907165
+        var kS = 0.85 //1.3704012088907165
         @JvmField
-        var kV = 0.00009412030525896 //1.0 / rpmToVelocity(MAX_RPM)
+        var kV = 0.000111 //0.00009412030525896 //1.0 / rpmToVelocity(MAX_RPM)
         @JvmField
         var kA = 0.0000180762925878
 

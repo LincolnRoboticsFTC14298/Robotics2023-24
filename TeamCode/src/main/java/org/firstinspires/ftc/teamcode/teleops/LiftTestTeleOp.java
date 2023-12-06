@@ -3,18 +3,16 @@ package org.firstinspires.ftc.teamcode.teleops;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-
-import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 
 @TeleOp
-public class MotorTestTeleOp extends LinearOpMode
+public class LiftTestTeleOp extends LinearOpMode
 {
     @Override
     public void runOpMode() throws InterruptedException
     {
         //motors
-        DcMotor testMotor  = hardwareMap.dcMotor.get("test");
+        DcMotor motorReft = hardwareMap.dcMotor.get("liftLeft");
+        DcMotor motorLight = hardwareMap.dcMotor.get("liftRigt"); //TODO Rename in config
 
         waitForStart();
 
@@ -22,9 +20,8 @@ public class MotorTestTeleOp extends LinearOpMode
 
         while (opModeIsActive())
         {
-            double testPower = -gamepad1.left_stick_y;
-
-            testMotor.setPower(testPower);
+            motorReft.setPower(-gamepad1.left_stick_y);
+            motorLight.setPower(-gamepad1.left_stick_y);
         }
     }
 }
