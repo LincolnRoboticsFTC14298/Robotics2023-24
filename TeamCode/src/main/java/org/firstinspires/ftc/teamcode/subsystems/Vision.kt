@@ -35,6 +35,10 @@ we can use muiltiple cameras
 TODO Research veiwportContainerIds
 TODO Create different pipelines for apriltag, *pixels, spike mark
 TODO add april tag data to fieldConfig/cameraConfig
+Mo
+TODO change pipelines to use constants in fieldconfig
+TODO remove telemetry from the pipeline, we only need it for the tuning opmode
+TODO write a pipline for detecting a cone of a specific color, write a tuning opmode for that pipline with editable filter parameters via the dashboard like in the Mecanum and Vision subsystems for ease of tuning
 DONE see if we can put apriltag on team prop for spike mark scoring. if not, pipeline to detect white pixel
 No apriltags on team prop
  */
