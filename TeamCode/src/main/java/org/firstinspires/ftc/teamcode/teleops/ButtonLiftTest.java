@@ -12,7 +12,7 @@ public class ButtonLiftTest extends LinearOpMode
     {
         //motors
         DcMotor motorReft = hardwareMap.dcMotor.get("liftLeft");
-        DcMotor motorLight = hardwareMap.dcMotor.get("liftRigt");
+        DcMotor motorLight = hardwareMap.dcMotor.get("liftRigt"); // TODO: Rename in config
 
         waitForStart();
 
