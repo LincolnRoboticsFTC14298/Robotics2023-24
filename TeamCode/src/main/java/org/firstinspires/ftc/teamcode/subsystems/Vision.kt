@@ -36,8 +36,11 @@ TODO Research veiwportContainerIds
 TODO Create different pipelines for apriltag, *pixels, spike mark
 TODO add april tag data to fieldConfig/cameraConfig
 Mo
-TODO change pipelines to use constants in fieldconfig
-TODO remove telemetry from the pipeline, we only need it for the tuning opmode
+DONE change pipelines to use constants in fieldconfig
+TODO search vision subsystem for additions and changes to make
+TODO add method for returning Pose2D from aprilTagID
+DONE rewrite apriltag pipeline java in kotlin
+TODO not urgent: python/java script train convexity and aspect ratio values (mean and variance) might already exist in test pipeline
 TODO write a pipline for detecting a cone of a specific color, write a tuning opmode for that pipline with editable filter parameters via the dashboard like in the Mecanum and Vision subsystems for ease of tuning
 DONE see if we can put apriltag on team prop for spike mark scoring. if not, pipeline to detect white pixel
 No apriltags on team prop
@@ -66,20 +69,20 @@ class Vision(
 
     private val dashboard = FtcDashboard.getInstance()
 
-    enum class AprilTagResult(var id: Int) {
-        BACKDROP_LEFT_BLUE(1),
-        BACKDROP_MIDDLE_BLUE(2),
-        BACKDROP_RIGHT_BLUE(3),
+    enum class AprilTagResult(var id: Int, var tagSize: Double) {
+        BACKDROP_LEFT_BLUE(1, 2.0),
+        BACKDROP_MIDDLE_BLUE(2, 2.0),
+        BACKDROP_RIGHT_BLUE(3, 2.0),
 
-        BACKDROP_LEFT_RED(4),
-        BACKDROP_MIDDLE_RED(5),
-        BACKDROP_RIGHT_RED(6),
+        BACKDROP_LEFT_RED(4, 2.0),
+        BACKDROP_MIDDLE_RED(5, 2.0),
+        BACKDROP_RIGHT_RED(6, 2.0),
 
-        AUDIENCE_WALL_BIG_BLUE(10),
-        AUDIENCE_WALL_SMALL_BLUE(9),
+        AUDIENCE_WALL_BIG_BLUE(10, 5.0),
+        AUDIENCE_WALL_SMALL_BLUE(9, 2.0),
 
-        AUDIENCE_WALL_BIG_RED(7),
-        AUDIENCE_WALL_SMALL_RED(8);
+        AUDIENCE_WALL_BIG_RED(7, 5.0),
+        AUDIENCE_WALL_SMALL_RED(8, 2.0);
 
         companion object {
             fun find(id: Int): AprilTagResult? = AprilTagResult.values().find { it.id == id }
@@ -87,7 +90,7 @@ class Vision(
     }
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
-        APRIL_TAG(AprilTagDetectionPipeline(CameraData.LOGITECH_C920 ,telemetry)),
+        APRIL_TAG(AprilTagDetectionPipeline(CameraData.LOGITECH_C920)),
         GENERAL_PIPELINE(GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, null))
     }
 
@@ -181,7 +184,7 @@ class Vision(
         // enables us to only run logic when there has been a new frame, as opposed to the
         // getLatestDetections() method which will always return an object.
         val aprilTagDetectionPipeline = (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline)
-        val detections: ArrayList<AprilTagDetection> = aprilTagDetectionPipeline.detectionsUpdate
+        val detections: ArrayList<AprilTagDetection>? = aprilTagDetectionPipeline.getDetectionsUpdate()
 
         // If there's been a new frame...
         if (detections != null) {
