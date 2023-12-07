@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
+import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.FieldConfig
@@ -29,6 +30,21 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
+/*
+we can use muiltiple cameras
+TODO Research veiwportContainerIds
+TODO Create different pipelines for apriltag, *pixels, spike mark
+TODO add april tag data to fieldConfig/cameraConfig
+Mo
+DONE change pipelines to use constants in fieldconfig
+TODO search vision subsystem for additions and changes to make
+TODO add method for returning Pose2D from aprilTagID
+DONE rewrite apriltag pipeline java in kotlin
+TODO not urgent: python/java script train convexity and aspect ratio values (mean and variance) might already exist in test pipeline
+TODO write a pipline for detecting a cone of a specific color, write a tuning opmode for that pipline with editable filter parameters via the dashboard like in the Mecanum and Vision subsystems for ease of tuning
+DONE see if we can put apriltag on team prop for spike mark scoring. if not, pipeline to detect white pixel
+No apriltags on team prop
+ */
 
 
 /**
@@ -53,10 +69,20 @@ class Vision(
 
     private val dashboard = FtcDashboard.getInstance()
 
-    enum class AprilTagResult(var id: Int) {
-        PARK_LEFT(5),
-        PARK_MIDDLE(15),
-        PARK_RIGHT(9);
+    enum class AprilTagResult(var id: Int, var tagSize: Double) {
+        BACKDROP_LEFT_BLUE(1, 2.0),
+        BACKDROP_MIDDLE_BLUE(2, 2.0),
+        BACKDROP_RIGHT_BLUE(3, 2.0),
+
+        BACKDROP_LEFT_RED(4, 2.0),
+        BACKDROP_MIDDLE_RED(5, 2.0),
+        BACKDROP_RIGHT_RED(6, 2.0),
+
+        AUDIENCE_WALL_BIG_BLUE(10, 5.0),
+        AUDIENCE_WALL_SMALL_BLUE(9, 2.0),
+
+        AUDIENCE_WALL_BIG_RED(7, 5.0),
+        AUDIENCE_WALL_SMALL_RED(8, 2.0);
 
         companion object {
             fun find(id: Int): AprilTagResult? = AprilTagResult.values().find { it.id == id }
@@ -64,7 +90,7 @@ class Vision(
     }
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
-        APRIL_TAG(AprilTagDetectionPipeline(1.18,  CameraData.LOGITECH_C920)),
+        APRIL_TAG(AprilTagDetectionPipeline(CameraData.LOGITECH_C920)),
         GENERAL_PIPELINE(GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, null))
     }
 
@@ -158,7 +184,7 @@ class Vision(
         // enables us to only run logic when there has been a new frame, as opposed to the
         // getLatestDetections() method which will always return an object.
         val aprilTagDetectionPipeline = (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline)
-        val detections: ArrayList<AprilTagDetection> = aprilTagDetectionPipeline.detectionsUpdate
+        val detections: ArrayList<AprilTagDetection>? = aprilTagDetectionPipeline.getDetectionsUpdate()
 
         // If there's been a new frame...
         if (detections != null) {
@@ -190,6 +216,7 @@ class Vision(
     data class ObservationResult(val angle: Double, val distance: Double) {
 
         companion object {
+
             fun fromVector(vector: Vector2d) : ObservationResult {
                return ObservationResult(vector.angleCast().log(), vector.norm())
             }
@@ -231,6 +258,8 @@ class Vision(
 
         return landmarks
     }
+
+
 
     fun getLandmarkInfo(): List<ObservationResult> = getCameraSpaceLandmarkInfo().map{ it + CameraData.LOGITECH_C920.relativePosition }
 
@@ -371,7 +400,7 @@ class Vision(
             ),
             LOGITECH_C920(Math.toRadians(5.05), 5.44, Vector2d(4.5, 0.0),
                 Math.toRadians(70.42),
-                Math.toRadians(43.3), 1.44943054e+3, 1.44934063e+3, 9.37759430e+2, 5.34866814e+2, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695)
+                Math.toRadians(43.3), 477.73045982, 479.24207234, 311.48519892, 176.10784813, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695)
             );
 
             fun getCameraMatrix(): Mat {
