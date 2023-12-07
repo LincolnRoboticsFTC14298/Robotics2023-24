@@ -14,7 +14,8 @@ public class MotorTestTeleOp extends LinearOpMode
     public void runOpMode() throws InterruptedException
     {
         //motors
-        DcMotor testMotor  = hardwareMap.dcMotor.get("test");
+        DcMotor motorReft = hardwareMap.dcMotor.get("liftLeft");
+        DcMotor motorLight = hardwareMap.dcMotor.get("liftRigt");
 
         waitForStart();
 
@@ -22,9 +23,10 @@ public class MotorTestTeleOp extends LinearOpMode
 
         while (opModeIsActive())
         {
-            double testPower = -gamepad1.left_stick_y;
+            int isGo = (gamepad1.a?1:0) - (gamepad1.b?1:0);
 
-            testMotor.setPower(testPower);
+            motorReft.setPower(1.0 * isGo);
+            motorLight.setPower(1.0 * isGo);
         }
     }
 }
