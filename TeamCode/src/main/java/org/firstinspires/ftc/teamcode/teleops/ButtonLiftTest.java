@@ -3,12 +3,9 @@ package org.firstinspires.ftc.teamcode.teleops;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-
-import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
 
 @TeleOp
-public class MotorTestTeleOp extends LinearOpMode
+public class ButtonLiftTest extends LinearOpMode
 {
     @Override
     public void runOpMode() throws InterruptedException
