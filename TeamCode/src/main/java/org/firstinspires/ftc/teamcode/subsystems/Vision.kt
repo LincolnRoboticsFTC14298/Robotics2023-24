@@ -8,7 +8,6 @@ import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.robotcore.hardware.HardwareMap
-import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
 import org.firstinspires.ftc.teamcode.FieldConfig
@@ -31,19 +30,13 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /*
-we can use muiltiple cameras
 TODO Research veiwportContainerIds
 TODO Create different pipelines for apriltag, *pixels, spike mark
 TODO add april tag data to fieldConfig/cameraConfig
-Mo
-DONE change pipelines to use constants in fieldconfig
 TODO search vision subsystem for additions and changes to make
 TODO add method for returning Pose2D from aprilTagID
-DONE rewrite apriltag pipeline java in kotlin
 TODO not urgent: python/java script train convexity and aspect ratio values (mean and variance) might already exist in test pipeline
 TODO write a pipline for detecting a cone of a specific color, write a tuning opmode for that pipline with editable filter parameters via the dashboard like in the Mecanum and Vision subsystems for ease of tuning
-DONE see if we can put apriltag on team prop for spike mark scoring. if not, pipeline to detect white pixel
-No apriltags on team prop
  */
 
 
@@ -52,9 +45,9 @@ No apriltags on team prop
  */
 @Config
 class Vision(
-    hwMap: HardwareMap,
-    startingPipeline: FrontPipeline = FrontPipeline.GENERAL_PIPELINE,
-    private val telemetry: Telemetry? = null
+        hwMap: HardwareMap,
+        startingPipeline: FrontPipeline = FrontPipeline.CONE_PIPELINE,
+        private val telemetry: Telemetry? = null
 ) : SubsystemBase() {
 
     val cameraMonitorViewId = hwMap.appContext.resources.getIdentifier(
@@ -91,7 +84,7 @@ class Vision(
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
         APRIL_TAG(AprilTagDetectionPipeline(CameraData.LOGITECH_C920)),
-        GENERAL_PIPELINE(GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, null))
+        CONE_PIPELINE(GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, null))
     }
 
     val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.PHONECAM, telemetry)
@@ -99,7 +92,7 @@ class Vision(
     init {
         name = "Vision Subsystem"
 
-        (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).telemetry = telemetry
+        (FrontPipeline.CONE_PIPELINE.pipeline as GeneralPipeline).telemetry = telemetry
 
         // Open cameras asynchronously and load the pipelines
         phoneCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
@@ -238,8 +231,8 @@ class Vision(
      */
     fun getCameraSpaceLandmarkInfo(): List<ObservationResult> {
 
-        val poles = (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).poleResults
-        val stacks = (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).stackResults.toMutableList()
+        val poles = (FrontPipeline.CONE_PIPELINE.pipeline as GeneralPipeline).poleResults
+        val stacks = (FrontPipeline.CONE_PIPELINE.pipeline as GeneralPipeline).stackResults.toMutableList()
 
         val landmarks = mutableListOf<ObservationResult>()
 
@@ -309,7 +302,7 @@ class Vision(
             if(stack.distanceByPitch != null) stacks.add(ObservationResult(stack.angle, stack.distanceByPitch))
         }
 
-        (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).stackResults.forEach { stack ->
+        (FrontPipeline.CONE_PIPELINE.pipeline as GeneralPipeline).stackResults.forEach { stack ->
             if(stack.distanceByPitch != null) stacks.add(ObservationResult(stack.angle, stack.distanceByPitch))
         }
 
@@ -327,7 +320,7 @@ class Vision(
             }
         }
 
-        (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).poleResults.forEach { pole ->
+        (FrontPipeline.CONE_PIPELINE.pipeline as GeneralPipeline).poleResults.forEach { pole ->
             if (pole.distanceByPitch != null && abs(pole.distanceByPitch - pole.distanceByWidth) < 3.0 ) {
                 poles.add(ObservationResult(pole.angle, pole.distanceByPitch))
             } else {
@@ -349,9 +342,9 @@ class Vision(
 
         packet.addLine("")
         packet.addLine("Raw data")
-        packet.put("Stacks", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).stackResults)
-        packet.put("Poles", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).poleResults)
-        packet.put("Single cones", (FrontPipeline.GENERAL_PIPELINE.pipeline as GeneralPipeline).singleConeResults)
+        packet.put("Stacks", (FrontPipeline.CONE_PIPELINE.pipeline as GeneralPipeline).stackResults)
+        packet.put("Poles", (FrontPipeline.CONE_PIPELINE.pipeline as GeneralPipeline).poleResults)
+        packet.put("Single cones", (FrontPipeline.CONE_PIPELINE.pipeline as GeneralPipeline).singleConeResults)
     }
 
     fun drawObservations(canvas: Canvas, pose: Pose2d, showAll: Boolean = false) {
