@@ -5,14 +5,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp
-public class ButtonLiftTest extends LinearOpMode
+public class MotorTestTeleOp extends LinearOpMode
 {
     @Override
     public void runOpMode() throws InterruptedException
     {
         //motors
-        DcMotor motorReft = hardwareMap.dcMotor.get("liftLeft");
-        DcMotor motorLight = hardwareMap.dcMotor.get("liftRigt"); // TODO: Rename in config
+        DcMotor testMotor  = hardwareMap.dcMotor.get("test");
 
         waitForStart();
 
@@ -20,10 +19,10 @@ public class ButtonLiftTest extends LinearOpMode
 
         while (opModeIsActive())
         {
-            int isGo = (gamepad1.a?1:0) - (gamepad1.b?1:0);
-
-            motorReft.setPower(1.0 * isGo);
-            motorLight.setPower(1.0 * isGo);
+            double testPower = -gamepad1.left_stick_y;
+            testMotor.setPower(testPower);
+            telemetry.addData("Power", testPower);
+            telemetry.update();
         }
     }
 }
