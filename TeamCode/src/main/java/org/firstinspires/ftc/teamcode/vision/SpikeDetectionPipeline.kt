@@ -1,7 +1,6 @@
-package org.firstinspires.ftc.teamcode.vision.testing
+package org.firstinspires.ftc.teamcode.vision
 
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.FieldConfig.poleBaseHeight
 import org.firstinspires.ftc.teamcode.FieldConfig.poleDiameter
 import org.firstinspires.ftc.teamcode.subsystems.Vision
