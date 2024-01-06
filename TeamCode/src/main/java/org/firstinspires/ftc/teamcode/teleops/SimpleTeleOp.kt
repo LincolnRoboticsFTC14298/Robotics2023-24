@@ -7,7 +7,7 @@ import com.arcrobotics.ftclib.command.CommandOpMode
 import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.commands.drive.SimpleJoystickDrive
+import org.firstinspires.ftc.teamcode.commands.drive.TestSimpleJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
@@ -71,7 +71,7 @@ class SimpleTeleOp : CommandOpMode() {
         var fieldCentric = false
 
         mecanum.defaultCommand =
-            SimpleJoystickDrive(
+            TestSimpleJoystickDrive(
                 mecanum,
                 input,
                 { fieldCentric },
