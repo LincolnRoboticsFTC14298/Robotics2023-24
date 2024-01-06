@@ -1,18 +1,17 @@
-package org.firstinspires.ftc.teamcode.teleops;
+package org.firstinspires.ftc.teamcode.teleops.testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp
-public class LiftTestTeleOp extends LinearOpMode
+public class MotorTestTeleOp extends LinearOpMode
 {
     @Override
     public void runOpMode() throws InterruptedException
     {
         //motors
-        DcMotor motorLeft = hardwareMap.dcMotor.get("liftLeft");
-        DcMotor motorRight = hardwareMap.dcMotor.get("liftRight"); //TODO Rename in config
+        DcMotor testMotor  = hardwareMap.dcMotor.get("test");
 
         waitForStart();
 
@@ -20,8 +19,10 @@ public class LiftTestTeleOp extends LinearOpMode
 
         while (opModeIsActive())
         {
-            motorLeft.setPower(-gamepad1.left_stick_y);
-            motorRight.setPower(-gamepad1.left_stick_y);
+            double testPower = -gamepad1.left_stick_y;
+            testMotor.setPower(testPower);
+            telemetry.addData("Power", testPower);
+            telemetry.update();
         }
     }
 }
