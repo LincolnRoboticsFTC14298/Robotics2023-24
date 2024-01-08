@@ -22,14 +22,14 @@ import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 
 @TeleOp
-class MainTeleOp  : CommandOpMode() {
+class TestTeleOp  : CommandOpMode() {
     override fun initialize() {
         /****************************************************
          * Initialize hardware                              *
          ****************************************************/
 
         val voltageSensor = VoltageSensor(hardwareMap)
-        //val lift = Lift(hardwareMap, voltageSensor)
+        val lift = Lift(hardwareMap, voltageSensor)
         val claw = Claw(hardwareMap)
         val passthrough = Passthrough(hardwareMap)
         //val vision = Vision(hardwareMap)
@@ -38,7 +38,7 @@ class MainTeleOp  : CommandOpMode() {
         val mecanum = MecanumDrive(hardwareMap, Pose2d(0.0, 0.0, Math.toRadians(90.0)), localizer, voltageSensor)
 
         //register(lift, claw, passthrough, mecanum, vision)
-        register(mecanum, claw, passthrough)
+        register(mecanum, claw, passthrough, lift)
 
         /****************************************************
          * Driver 1 Controls                                *
@@ -72,7 +72,6 @@ class MainTeleOp  : CommandOpMode() {
                 InstantCommand(claw::open, claw) //TODO make version for dual claw where pressing B once opens primary claw, pressing it a second time opens secondary claw (make new InstantCommand, see ChatGPT answer)
             )
 
-
         //TEST
         driver1
             .getGamepadButton(GamepadKeys.Button.X)
@@ -87,6 +86,17 @@ class MainTeleOp  : CommandOpMode() {
             )
 
 
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.DPAD_UP)
+//            .whenPressed(
+//                InstantCommand(lift::pickUp, lift)
+//            )
+//
+//        driver1
+//            .getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+//            .whenPressed(
+//                InstantCommand(lift::pickUp, lift)
+//            )
 
 
     }
