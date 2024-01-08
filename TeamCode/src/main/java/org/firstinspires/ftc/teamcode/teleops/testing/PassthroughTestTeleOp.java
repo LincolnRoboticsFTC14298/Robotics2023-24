@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
 
-public class PassThroughTest extends LinearOpMode
+public class PassthroughTestTeleOp extends LinearOpMode
 {
     double position;
     double MAX_POS = 0.6;
