@@ -4,11 +4,10 @@ import com.acmerobotics.roadrunner.Vector2d
 
 object FieldConfig {
 
-    const val tileSize = 23.5 // in
+    const val tileSize = 23.5 // unnecessary?
 
-    const val coneDiameter = 5.0 // in TODO measure
-    const val poleDiameter = 1.0 // in TODO measure
-    const val poleBaseHeight = 3.0 //in TODO measure
+    const val spikeDiameter = 4.0 //in
+    const val spikeHeight = 3.5 //in
 
     const val backdropAprilTagHeight = 2.0 //in
     const val audienceSmallAprilTagHeight = 2.0 //in
@@ -17,63 +16,23 @@ object FieldConfig {
 
 
     /**
-     * Different types of poles. Height in inches.
+     * All of the apriltags on the field and their respective ids.
      */
-    enum class PoleType(val height: Double) {
-        LOW(13.5),
-        MEDIUM(23.5),
-        HIGH(33.5)
+    enum class PoleType(val height: Int) {
+        BLUE_BACKDROP_LEFT(1),
+        BLUE_BACKDROP_CENTER(2),
+        BLUE_BACKDROP_RIGHT(3),
+
+        RED_BACKDROP_LEFT(4),
+        RED_BACKDROP_CENTER(5),
+        RED_BACKDROP_RIGHT(6),
+
+        BLUE_FRONT_SMALL(9),
+        BLUE_FRONT_LARGE(10),
+
+        RED_FRONT_SMALL(8),
+        RED_FRONT_LARGE(7)
     }
 
-    /**
-     * All poles on the field.
-     */
-    enum class Pole(x: Int, y: Int, val type: PoleType) {
-        TWO_ONE(2, 1, PoleType.LOW),
-        TWO_NEG_ONE(2, -1, PoleType.LOW),
-
-        ONE_TWO(1, 2, PoleType.LOW),
-        ONE_ONE(1, 1, PoleType.MEDIUM),
-        ONE_ZERO(1, 0, PoleType.HIGH),
-        ONE_NEG_ONE(1, -1, PoleType.MEDIUM),
-        ONE_NEG_TWO(1, -2, PoleType.LOW),
-
-        ZERO_ONE(0, 1, PoleType.HIGH),
-        ZERO_NEG_ONE(0, -1, PoleType.HIGH),
-
-        NEG_ONE_TWO(-1, 2, PoleType.LOW),
-        NEG_ONE_ONE(-1, 1, PoleType.MEDIUM),
-        NEG_ONE_ZERO(-1, 0, PoleType.HIGH),
-        NEG_ONE_NEG_ONE(-1, -1, PoleType.MEDIUM),
-        NEG_ONE_NEG_TWO(-1, -2, PoleType.LOW),
-
-        NEG_TWO_ONE(-2, 1, PoleType.LOW),
-        NEG_TWO_NEG_ONE(-2, -1, PoleType.LOW);
-
-        val vector = Vector2d(x * tileSize, y * tileSize)
-
-        companion object {
-            fun getPolesOfType(type: PoleType) : List<Pole> {
-                return values().filter { it.type == type }
-            }
-        }
-    }
-
-    enum class Junction(x: Int, y: Int) {
-        TWO_TWO(2, 2),
-        TWO_ZERO(2, 0),
-        TWO_NEG_TWO(2, -2),
-
-        ZERO_TWO(0, 2),
-        ZERO_ZERO(0, 0),
-        ZERO_NEG_TWO(0,-2),
-
-        NEG_TWO_TWO(-2, 2),
-        NEG_TWO_ZERO(-2, 0),
-        NEG_TWO_NEG_TWO(-2, -2);
-
-        val vector = Vector2d(x * tileSize, y * tileSize)
-
-    }
 
 }

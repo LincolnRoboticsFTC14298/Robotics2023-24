@@ -1,8 +1,7 @@
 package org.firstinspires.ftc.teamcode.vision
 
 import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.FieldConfig.poleBaseHeight
-import org.firstinspires.ftc.teamcode.FieldConfig.poleDiameter
+import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
@@ -38,19 +37,19 @@ open class SpikeDetectionPipeline(
     private val inputModule = InputModule()
     //private val undistort = UndistortLens(inputModule, camMat, distCoeffs)
     private val labColorSpace = ColorConverter(inputModule, Imgproc.COLOR_RGB2Lab)
-    private val spikeMask: Filter = if(isRedAlliance){Filter(labColorSpace, Scalar(0.0, 110.0, 150.0), Scalar(255.0, 150.0, 200.0))} else {Filter(labColorSpace, Scalar(0.0, 110.0, 150.0), Scalar(255.0, 150.0, 200.0))}
+    private val spikeMask: Filter = if(isRedAlliance){Filter(labColorSpace, Scalar(0.0, 154.0, 110.0), Scalar(255.0, 210.0, 190.0))} else {Filter(labColorSpace, Scalar(75.0, 106.0, 102.0), Scalar(133.0, 145.0, 124.0))}
     private val denoisedSpikeMask = Denoise(spikeMask, 5, 5, 3, 3)
     private val rawSpikeContours = Contours(denoisedSpikeMask)
 
     // Spike Mark Scorer //
-    private val spikeConvexityScorer = DiffSquaredScorer(Convexity(), 0.988, 11.09)
-    private val spikeExtentScorer = DiffSquaredScorer(Extent(), 0.661, 0.036)
-    private val spikeSolidityScorer = DiffSquaredScorer(Solidity(), 0.909, 0.227)
-    private val spikeAspectRatioScorer = DiffSquaredScorer(AspectRatio(), 1.369, 0.23)
+    private val spikeConvexityScorer = DiffSquaredScorer(Convexity(), 1.27, 1.04)
+    private val spikeExtentScorer = DiffSquaredScorer(Extent(), 0.89, 5.76)
+    private val spikeSolidityScorer = DiffSquaredScorer(Solidity(), 0.98, 6.6)
+    private val spikeAspectRatioScorer = DiffSquaredScorer(AspectRatio(), 1.27, 0.094)
     private val spikeContours = FilterContours(rawSpikeContours, 0.05, spikeConvexityScorer + spikeExtentScorer + spikeSolidityScorer + spikeAspectRatioScorer)
 
     // Results Modules //
-    private val spikeResultsModule = ContourResults(spikeContours, camera, poleDiameter, poleBaseHeight) //TODO MEASURE AND CHANGE OFFSETS
+    private val spikeResultsModule = ContourResults(spikeContours, camera, FieldConfig.spikeDiameter, FieldConfig.spikeHeight) //TODO MEASURE AND CHANGE OFFSETS
 
     // Data we care about and wish to access
     var spikeResults = listOf<ContourResults.AnalysisResult>()
