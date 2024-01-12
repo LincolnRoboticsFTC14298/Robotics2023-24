@@ -9,9 +9,9 @@ import com.arcrobotics.ftclib.hardware.ServoEx
 import com.arcrobotics.ftclib.hardware.SimpleServo
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
-import org.firstinspires.ftc.robotcore.external.Telemetry
 import java.lang.Math.toRadians
 import kotlin.math.cos
+import kotlin.math.sign
 
 
 /**
@@ -21,7 +21,7 @@ import kotlin.math.cos
  * @param hwMap             HardwareMap
  */
 @Config
-class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegree) : SubsystemBase() {
+class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughMinPosition) : SubsystemBase() {
 
     /**
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware">FTCLib Docs: Hardware</a>
@@ -29,43 +29,45 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
     private val servoLeft: ServoEx = SimpleServo(
         hwMap,
         leftPassthroughName,
-        passthroughMinDegree,
-        passthroughMaxDegree
+        0.0,
+        360.0
     )
     private val servoRight: ServoEx = SimpleServo(
         hwMap,
         rightPassthroughName,
-        passthroughMinDegree,
-        passthroughMaxDegree
+        0.0,
+        360.0
     )
 
     private var timer = ElapsedTime()
     private lateinit var motionProfile: TimeProfile
 
+    private var displacement: Double = 0.0
+
     var setpoint: Double = 0.0
-        set(angle) {
-            field = angle
-            timer.reset()
-            motionProfile = TimeProfile(constantProfile(field - getAngleEstimate(), 0.0, passthroughMaxVel, -passthroughMaxAccel, passthroughMaxAccel).baseProfile)
-            Log.i("Passthrough desired angle", setpoint.toString())
+        set(position) {
+            if (field != position) { //TODO replace with (displacement != 0.0) in case position != getPositionEstimate???
+                field = position //TODO Range.clip like in claw & lift
+                displacement = field - getPositionEstimate()
+                timer.reset()
+                motionProfile = TimeProfile(constantProfile(kotlin.math.abs(displacement), 0.0, passthroughMaxVel, -passthroughMaxAccel, passthroughMaxAccel).baseProfile)
+                Log.i("Passthrough desired position", setpoint.toString())
+            }
         }
 
     init {
-        servoLeft.inverted = true
+        servoRight.inverted = true
 
-        setpoint = startingAngle
-        servoLeft.turnToAngle(startingAngle)
-        servoRight.turnToAngle(startingAngle)
+        setpoint = startingPosition
+        setPosition(startingPosition)  // TODO investigate why passthrough position goes up and down after init
     }
 
     // TODO: check direction of servo
 
     override fun periodic() {
-        val targetAngle = motionProfile[timer.seconds()].value()
-        servoLeft.turnToAngle(targetAngle)
-        servoRight.turnToAngle(targetAngle)
-
-        Log.v("Passthrough angle estimate", getAngleEstimate().toString())
+        val targetPosition = (setpoint - displacement) + sign(displacement) * motionProfile[timer.seconds()].value()
+        setPosition(targetPosition)
+        Log.v("Passthrough position estimate", getPositionEstimate().toString())
     }
 
     fun junctionDeposit() {
@@ -76,14 +78,14 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
      * Rotate servo to drop off position.
      */
     fun deposit() {
-        setpoint = passthroughDepositAngle
+        setpoint = passthroughDepositPosition
     }
 
     /**
      * Rotate servo to pick up cone.
      */
     fun pickUp() {
-        setpoint = passthroughPickUpAngle
+        setpoint = passthroughPickUpPosition
     }
 
     fun setPosition(position: Double) {
@@ -95,7 +97,7 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
      * @return The position of the passthrough relative to where it is attached on the lift.
      */
     fun getRelativePosition(): Pose2d {
-        val currAngle = getAngleEstimate()
+        val currAngle = getPositionEstimate()
         val heading = if (currAngle <= 90.0) -180.0 else 0.0
         return Pose2d(-cos(toRadians(currAngle)) + passthroughOffsetDistanceFromLift, 0.0, heading)
     }
@@ -109,8 +111,8 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
     /**
      * @return Angle estimate based on motion profiling in degrees.
      */
-    fun getAngleEstimate() : Double {
-        return servoRight.angle
+    fun getPositionEstimate() : Double {
+        return servoRight.position
     }
 
     /**
@@ -120,9 +122,9 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
         return timer.seconds() - motionProfile.duration > passthroughTimeTolerance
     }
 
-    fun timeToTarget(angle: Double) =
+    fun timeToTarget(position: Double) =
         TimeProfile(
-            constantProfile(angle - getAngleEstimate(), 0.0, passthroughMaxVel, -passthroughMaxAccel, passthroughMaxAccel).baseProfile
+            constantProfile(kotlin.math.abs(position - getPositionEstimate()), 0.0, passthroughMaxVel, -passthroughMaxAccel, passthroughMaxAccel).baseProfile
         ).duration
 
     /**
@@ -133,25 +135,25 @@ class Passthrough(hwMap: HardwareMap, startingAngle: Double = passthroughMinDegr
     }
 
     companion object {
-        const val leftPassthroughName = "leftPassthrough"
-        const val rightPassthroughName = "rightPassthrough"
+        const val leftPassthroughName = "left"
+        const val rightPassthroughName = "right"
 
-        const val passthroughMinDegree = -45.0 // degrees
-        const val passthroughMaxDegree = 180.0 // degrees
+        const val passthroughMinPosition = 0.01 // empirically determined servo units
+        const val passthroughMaxPosition = 0.6 // empirically determined servo units
 
         const val passthroughOffsetDistanceFromLift = 0.0
 
         @JvmField
-        var passthroughPickUpAngle = -45.0 // degrees
+        var passthroughPickUpPosition = passthroughMinPosition
         @JvmField
-        var passthroughDepositAngle = 180.0 // degrees
+        var passthroughDepositPosition = passthroughMaxPosition
         @JvmField
         var passthroughJunctionAngle = -15.0
 
         @JvmField
         var passthroughMaxVel = 25.0
         @JvmField
-        var passthroughMaxAccel = 25.0
+        var passthroughMaxAccel = 1.0
 
         @JvmField
         var passthroughTimeTolerance = 0.2 // Seconds to wait after motion profile supposedly complete

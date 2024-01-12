@@ -1,22 +1,17 @@
-package org.firstinspires.ftc.teamcode.teleops
+package org.firstinspires.ftc.teamcode.teleops.testing
 
 import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.PoseVelocity2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.*
-import com.arcrobotics.ftclib.command.button.Trigger
 import com.arcrobotics.ftclib.gamepad.GamepadEx
-import com.arcrobotics.ftclib.gamepad.GamepadKeys
-import com.arcrobotics.ftclib.gamepad.TriggerReader
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.FieldConfig
-import org.firstinspires.ftc.teamcode.commands.*
 import org.firstinspires.ftc.teamcode.commands.drive.MotionProfiledJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 import org.firstinspires.ftc.teamcode.subsystems.*
 
 @TeleOp
-class BasicTeleOp : CommandOpMode() {
+class DrivebaseTestTeleOp : CommandOpMode() {
 
     override fun initialize() {
 

@@ -26,28 +26,29 @@ import org.firstinspires.ftc.teamcode.FieldConfig
 class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : SubsystemBase() {
 
     private val servo = SimpleServo(hwMap, clawServoName, 0.0, 360.0)
-    private var colorSensor = hwMap.get(NormalizedColorSensor::class.java, colorSensorName)
+    //private var colorSensor = hwMap.get(NormalizedColorSensor::class.java, colorSensorName)
 
-    private var timer = ElapsedTime()
-    private lateinit var motionProfile: TimeProfile
+    //private var timer = ElapsedTime()
+    //private lateinit var motionProfile: TimeProfile
 
     private var setpoint: Double = 0.0
         set(position) {
             field = clip(position, 0.0, 1.0)
-            timer.reset()
-            motionProfile = TimeProfile(constantProfile(position - getPositionEstimate(), 0.0, clawMaxVel, -clawMaxAccel, clawMaxAccel).baseProfile)
+            //timer.reset()
+            //motionProfile = TimeProfile(constantProfile(position - getPositionEstimate(), 0.0, clawMaxVel, -clawMaxAccel, clawMaxAccel).baseProfile)
             Log.i("Claw desired position", setpoint.toString())
         }
 
     init {
-        colorSensor.gain = colorGain.toFloat()
+        //colorSensor.gain = colorGain.toFloat()
         setpoint = startingPosition
         servo.position = startingPosition
     }
 
     override fun periodic() {
         Log.v("Claw estimated angle", getPositionEstimate().toString())
-        servo.position = motionProfile[timer.seconds()].value()
+        //servo.position = motionProfile[timer.seconds()].value()
+        servo.position = setpoint
     }
 
     /**
@@ -72,7 +73,8 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
      * Confirms if claw is at target.
      */
     fun atTarget() : Boolean {
-        return timer.seconds() > motionProfile.duration
+        //return timer.seconds() > motionProfile.duration
+        return true
     }
 
     private fun getPositionEstimate() : Double {
@@ -83,13 +85,13 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
      * Check if there is a cone based on color sensor.
      * @return [Boolean] of state.
      */
-    private val hsvValues = FloatArray(3)
-    fun isConeInside(): Boolean {
-        val colors = colorSensor.normalizedColors
-        Color.colorToHSV(colors.toColor(), hsvValues)
-        Log.i("Color Sensor Values", hsvValues.toString())
-        return hsvValues[2] >= valueThreshold
-    }
+//    private val hsvValues = FloatArray(3)
+//    fun isConeInside(): Boolean { //TODO either get motion profiling working or replace with non motion profiled approximation eg proportional to claw travel distance
+//        val colors = colorSensor.normalizedColors
+//        Color.colorToHSV(colors.toColor(), hsvValues)
+//        Log.i("Color Sensor Values", hsvValues.toString())
+//        return hsvValues[2] >= valueThreshold
+//    }
 
     /**
      * For debugging/tuning purposes
@@ -114,9 +116,9 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
         const val colorSensorName = "color"
 
         @JvmField
-        var clawClosedPosition = 0.85
+        var clawClosedPosition = 0.05
         @JvmField
-        var clawOpenedPosition = 0.73
+        var clawOpenedPosition = 0.15
         @JvmField
         var clawPartiallyOpenedPosition = 0.80
 

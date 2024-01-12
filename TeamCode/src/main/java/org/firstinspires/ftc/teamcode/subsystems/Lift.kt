@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.util.arrayToColumnMatrix
 import java.lang.Math.toRadians
 import kotlin.math.abs
 import kotlin.math.cos
+import kotlin.math.sign
 import kotlin.math.sin
 
 /**
@@ -49,6 +50,8 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
     private val profileTimer = ElapsedTime()
     private val timer = ElapsedTime()
 
+    private var displacement: Double = 0.0
+
     /**
      * @return Target height off the ground in in.
      */
@@ -58,10 +61,15 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
          * @param height        Target length in inches.
          */
         set(length) {
-            profileTimer.reset()
-            field = Range.clip(length, 0.0, liftMaxExtension)
-            motionProfile = TimeProfile(constantProfile(field - getExtensionLength(), 0.0, liftMaxVel, -liftMaxAccel, liftMaxAccel).baseProfile)
-            Log.i("Lift setpoint", length.toString())
+            Log.i("Lift setpoint attempt", length.toString())
+            if (length != getExtensionLength()) {
+                field = Range.clip(length, 0.0, liftMaxExtension)
+                displacement = field - getExtensionLength()
+                Log.i("Lift setpoint displacement", displacement.toString())
+                profileTimer.reset()
+                motionProfile = TimeProfile(constantProfile(abs(displacement), 0.0, liftMaxVel, -liftMaxAccel, liftMaxAccel).baseProfile)
+                Log.i("Lift setpoint", length.toString())
+            }
         }
 
     init {
@@ -94,6 +102,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         //  Naive optimization would only write when motion profiling is active; heavily trusts ff
 
         desiredState = motionProfile[profileTimer.seconds()].values().toDoubleArray()
+        desiredState[0] = (setpoint - displacement) + sign(displacement) * desiredState[0]
 
         controller.apply {
             targetPosition = desiredState[0]
@@ -156,7 +165,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
      * Retracts the lift to the starting height.
      */
     fun retract() {
-        setpoint = 0.0
+        setpoint = 0.01
         checkLimit = true
     }
 
@@ -244,13 +253,13 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
     }
 
     companion object {
-        const val leftLiftName = "leftLift"
-        const val rightLiftName = "rightLift"
+        const val leftLiftName = "liftLeft"
+        const val rightLiftName = "liftRight"
         const val magnetLimitName = "magnet"
 
         const val liftHeightOffset = 0.0 // in The raw height of zero is off the ground
 
-        const val liftMaxExtension = 0.0 // in Max allowable extension height
+        const val liftMaxExtension = 10000.0 // in Max allowable extension height
         const val poleLiftOffset = 5.0 // in above the pole the lift should be at
 
         const val liftDPP = 1.0 // TODO: Find experimentally
