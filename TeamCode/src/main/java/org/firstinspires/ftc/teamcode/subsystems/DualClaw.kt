@@ -23,13 +23,21 @@ import org.firstinspires.ftc.teamcode.FieldConfig
  * @param hwMap HardwareMap.
  */
 @Config
-class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : SubsystemBase() {
+class DualClaw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : SubsystemBase() {
 
     private val servo = SimpleServo(hwMap, clawServoName, 0.0, 360.0)
     //private var colorSensor = hwMap.get(NormalizedColorSensor::class.java, colorSensorName)
 
     //private var timer = ElapsedTime()
     //private lateinit var motionProfile: TimeProfile
+
+    private enum class DualClawState {
+        CLOSED,
+        PARTIAL,
+        FULL
+    }
+
+    private var clawState: DualClawState = DualClawState.CLOSED
 
     private var setpoint: Double = 0.0
         set(position) {
@@ -45,6 +53,7 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
         //colorSensor.gain = colorGain.toFloat()
         setpoint = startingPosition
         servo.position = startingPosition
+        DualClawState.CLOSED
     }
 
     override fun periodic() {
@@ -58,10 +67,12 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
      */
     fun open() {
         setpoint = clawOpenedPosition
+        clawState = DualClawState.FULL
     }
 
     fun partiallyOpen() {
         setpoint = clawPartiallyOpenedPosition
+        clawState = DualClawState.PARTIAL
     }
 
     /**
@@ -69,6 +80,18 @@ class Claw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : 
      */
     fun close() {
         setpoint = clawClosedPosition
+        clawState = DualClawState.CLOSED
+    }
+    /**
+     * Incrament opening by 1
+     */
+
+    fun incramentOpen() {
+        setpoint = if (clawState == DualClawState.CLOSED) {
+            clawPartiallyOpenedPosition
+        } else {
+            clawOpenedPosition
+        }
     }
 
     /**

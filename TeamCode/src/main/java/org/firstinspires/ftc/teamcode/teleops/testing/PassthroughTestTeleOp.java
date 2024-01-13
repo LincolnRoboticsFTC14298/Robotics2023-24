@@ -10,7 +10,7 @@ public class PassthroughTestTeleOp extends LinearOpMode
 {
     double position;
     double MAX_POS = 0.6;
-    double MIN_POS = 0.01;
+    double MIN_POS = 0.0;
     Servo leftServo;
     Servo rightServo;
     @Override

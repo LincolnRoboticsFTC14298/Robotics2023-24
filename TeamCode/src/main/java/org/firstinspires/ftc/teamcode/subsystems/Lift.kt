@@ -13,8 +13,6 @@ import com.qualcomm.robotcore.hardware.TouchSensor
 import com.qualcomm.robotcore.util.ElapsedTime
 import com.qualcomm.robotcore.util.Range
 import org.ejml.simple.SimpleMatrix
-import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.FieldConfig
 import org.firstinspires.ftc.teamcode.filters.kalmanFilter.*
 import org.firstinspires.ftc.teamcode.util.PIDCoefficients
 import org.firstinspires.ftc.teamcode.util.arrayToColumnMatrix
@@ -41,7 +39,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
 
     private val limit = hwMap.get(TouchSensor::class.java, magnetLimitName)
 
-    private val controller = PIDFController(liftCoeffs, liftKStatic, liftKV, liftKA)
+    private var controller = PIDFController(liftCoeffs, liftKStatic, liftKV, liftKA, {_, _ -> gravityFeedforward})
     private lateinit var motionProfile: TimeProfile
 
     private var filter: KalmanFilter
@@ -51,6 +49,14 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
     private val timer = ElapsedTime()
 
     private var displacement: Double = 0.0
+
+    enum class LiftPosition(val height: Double) {
+        LOW(lowHeight),
+        MIDDLE(midHeight),
+        HIGH(highHeight)
+    }
+
+    var lastPosition: LiftPosition = LiftPosition.LOW
 
     /**
      * @return Target height off the ground in in.
@@ -62,13 +68,11 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
          */
         set(length) {
             Log.i("Lift setpoint attempt", length.toString())
-            if (length != getExtensionLength()) {
-                field = Range.clip(length, 0.0, liftMaxExtension)
-                displacement = field - getExtensionLength()
-                Log.i("Lift setpoint displacement", displacement.toString())
+            field = Range.clip(length, 0.0, liftMaxExtension)
+            displacement = field - getRawExtensionLength() //TODO also change to setpoint here
+            if (displacement != 0.0) { //TODO change getExtensionLength() to setpoint to get displacement between previous and current values
                 profileTimer.reset()
                 motionProfile = TimeProfile(constantProfile(abs(displacement), 0.0, liftMaxVel, -liftMaxAccel, liftMaxAccel).baseProfile)
-                Log.i("Lift setpoint", length.toString())
             }
         }
 
@@ -83,10 +87,10 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         // Retracted and stationary
         val initialState = SimpleMatrix(arrayOf(doubleArrayOf(0.0, 0.0, 0.0))).transpose()
         // Completely sure that it is retracted and stationary
-        val initialCovariance = SimpleMatrix(arrayOf(doubleArrayOf(0.0)))
+        val initialCovariance = SimpleMatrix(3, 3)
         filter = KalmanFilter(processModel, measurementModel, initialState, initialCovariance)
 
-        motorGroup.resetEncoder()
+        resetEncoders()
 
         motorGroup.setDistancePerPulse(liftDPP)
         motorGroup.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT)
@@ -94,20 +98,19 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         retract()
     }
 
-    lateinit var desiredState: DoubleArray
+    var desiredState: DoubleArray = DoubleArray(3)
     override fun periodic() {
         // TODO: Maybe only set power if it has actually changed!! Do this through thresholding
         //  integrating current power with desired power. Write wrappers for automatic voltage
         //  compensation.
         //  Naive optimization would only write when motion profiling is active; heavily trusts ff
 
-        desiredState = motionProfile[profileTimer.seconds()].values().toDoubleArray()
-        desiredState[0] = (setpoint - displacement) + sign(displacement) * desiredState[0]
+        desiredState = getGlobalDesiredState()
 
         controller.apply {
             targetPosition = desiredState[0]
             targetVelocity = desiredState[1]
-            targetAcceleration = desiredState[2] + gravityFeedforward
+            targetAcceleration = desiredState[2]
         }
 
         checkEncoder()
@@ -117,6 +120,28 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         updateFilter(arrayToColumnMatrix(u))
 
         setPower(controller.update(getExtensionLength(), getVelocity()))
+
+        timer.reset()
+
+        Log.v("getRawExtensionLength", getRawExtensionLength().toString())
+        Log.v("getExtensionLength", getExtensionLength().toString())
+    }
+
+
+    fun tuningPeriodic() {
+
+        desiredState = getGlobalDesiredState()
+        controller.apply {
+            targetPosition = desiredState[0]
+            targetVelocity = desiredState[1]
+            targetAcceleration = desiredState[2]
+        }
+
+        checkEncoder()
+
+        val power = controller.update(getRawExtensionLength(), getRawVelocity())
+        Log.i("lift power", power.toString())
+        setPower(power)
 
         timer.reset()
     }
@@ -142,23 +167,50 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
     fun checkEncoder() {
         if (checkLimit && getExtensionLength() <= withinSwitchRange) {
             if (limit.isPressed) {
-                motorGroup.resetEncoder()
+                resetEncoders()
                 checkLimit = false // Only need to check limit switch once
                 Log.i("Limit Switch", "Resetting")
             }
         }
     }
 
+    fun resetEncoders() {
+        leftMotor.resetEncoder()
+        rightMotor.resetEncoder()
+    }
+
+    fun updateController() {
+        controller.pid = liftCoeffs
+        controller.kStatic = liftKStatic
+        controller.kV = liftKV
+        controller.kA = liftKA
+        controller.kF = {_, _ -> gravityFeedforward}
+    }
+
+    fun getGlobalDesiredState(): DoubleArray {
+        val displacementDesiredState = motionProfile[profileTimer.seconds()].values().toDoubleArray()
+        Log.v("disp desired state", displacementDesiredState.contentToString())
+        val globalDesiredState = DoubleArray(3)
+        globalDesiredState[0] = (setpoint - displacement) + (sign(displacement) * displacementDesiredState[0])
+        globalDesiredState[1] = displacementDesiredState[1] * sign(displacement)
+        globalDesiredState[2] = displacementDesiredState[2] * sign(displacement)
+        Log.v("global desired state", globalDesiredState.contentToString())
+        return globalDesiredState
+    }
+
     fun setHeight(height: Double) {
-        setpoint = (height - liftHeightOffset) / sin(toRadians(60.0)) // It will be extending upwards so no need to check
+        val targetLength = (height - liftHeightOffset) / sin(toRadians(liftAngle)) // It will be extending upwards so no need to check
+        setpoint = targetLength
         checkLimit = false
     }
     /**
      * Sets the target height of the lift and constructs an optimal motion profile for it.
      * @param pole          Based on [PoleType] heights.
      */
-    fun setHeight(pole: FieldConfig.PoleType) {
-        setHeight(pole.height + poleLiftOffset)
+
+    fun setHeight(pos: LiftPosition) {
+        setHeight(pos.height)
+        lastPosition = pos
     }
 
     /**
@@ -174,18 +226,23 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
      * @param power         Percentage of the maximum speed of the lift.
      */
     fun setPower(power: Double) {
-        motorGroup.set(power * 12.0 / voltageSensor.voltage)
+        if ((desiredState[1] > 0 && getRawExtensionLength() > 30.0) || (desiredState[1] < 0 && getRawExtensionLength() < 0.5)) {
+            motorGroup.set(0.0)
+        } else {
+            motorGroup.set(power * 12.0 / voltageSensor.voltage)
+        }
+
     }
 
     /**
      * Returns the position of where the passthrough is attached in tangent space.
      */
     fun getRelativePosition(): Pose2d {
-        return Pose2d(getExtensionLength() * cos(toRadians(60.0)) + liftOffsetDistanceFromCenter, 0.0, 0.0)
+        return Pose2d(getExtensionLength() * cos(toRadians(liftAngle)) + liftOffsetDistanceFromCenter, 0.0, 0.0)
     }
 
     fun getFutureRelativePosition(): Pose2d {
-        return Pose2d(setpoint * cos(toRadians(60.0)) + liftOffsetDistanceFromCenter, 0.0, 0.0)
+        return Pose2d(setpoint * cos(toRadians(liftAngle)) + liftOffsetDistanceFromCenter, 0.0, 0.0)
     }
 
     /**
@@ -213,14 +270,14 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
      * @return Raw lift position has extended relative to retracted state in in.
      */
     fun getRawExtensionLength(): Double {
-        return motorGroup.distance
+        return motorGroup.positions.average()
     }
 
     /**
      * @return Raw velocity of the lift in in / s.
      */
     fun getRawVelocity(): Double {
-        return motorGroup.correctedVelocity * liftDPP
+        return motorGroup.velocities.average()
     }
 
 
@@ -230,6 +287,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
     fun atTarget(): Boolean {
         return abs(getExtensionLength() - setpoint) < liftTargetErrorTolerance
     }
+
 
     /**
      * @return Time remaining from reaching the target.
@@ -242,14 +300,20 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
      * For debugging/tuning purposes
      */
     fun fetchTelemetry(packet: TelemetryPacket) {
+        packet.put("Battery adjustment factor", 12.0 / voltageSensor.voltage)
         packet.put("Lift raw length", getRawExtensionLength())
         packet.put("Lift raw velocity", getRawVelocity())
-        packet.put("Lift raw acceleration", motorGroup.encoder.acceleration * liftDPP)
+        //packet.put("Lift raw acceleration", motorGroup.encoder.acceleration * liftDPP)
         packet.put("Lift estimated length", getExtensionLength())
         packet.put("Lift estimated velocity", getVelocity())
         packet.put("Lift estimated acceleration", getAcceleration())
+        packet.put("Target position", desiredState[0])
+        packet.put("Position error", desiredState[0] - getRawExtensionLength())
         packet.put("Target velocity", desiredState[1])
-        packet.put("Velocity Error", desiredState[1] - getVelocity())
+        packet.put("Velocity Error", desiredState[1] - getRawVelocity())
+
+        Log.v("getRawExtensionLength", getRawExtensionLength().toString())
+        Log.v("getExtensionLength", getExtensionLength().toString())
     }
 
     companion object {
@@ -257,36 +321,44 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         const val rightLiftName = "liftRight"
         const val magnetLimitName = "magnet"
 
-        const val liftHeightOffset = 0.0 // in The raw height of zero is off the ground
+        const val liftHeightOffset = 7.5 // in The raw height of zero is off the ground
 
-        const val liftMaxExtension = 10000.0 // in Max allowable extension height
-        const val poleLiftOffset = 5.0 // in above the pole the lift should be at
+        const val liftMaxExtension = 27.0 // in Max allowable extension height
 
-        const val liftDPP = 1.0 // TODO: Find experimentally
+        const val liftDPP = 0.00673
 
-        const val liftOffsetDistanceFromCenter = 0.0
+        const val liftOffsetDistanceFromCenter = 0.0 // ignore
 
-        @JvmField
-        var liftMaxVel = 20.0 // in / s  // TODO: Find max values
-        @JvmField
-        var liftMaxAccel = 20.0 // in / s2
+        const val liftAngle = 36.98 // deg
 
         @JvmField
-        var liftKStatic = 0.0
+        var lowHeight = 10.0
         @JvmField
-        var liftKV = 1.0 / liftMaxVel
+        var midHeight = 17.5
         @JvmField
-        var liftKA = 0.0
+        var highHeight = 25.0
+
         @JvmField
-        var gravityFeedforward = 0.0
+        var liftMaxVel = 15.0 // in / s  // TODO: Find max values
+        @JvmField
+        var liftMaxAccel = 40.0 // in / s2
+
+        @JvmField
+        var liftKStatic = 0.1397
+        @JvmField
+        var liftKV = 0.05
+        @JvmField
+        var liftKA = 0.0035
+        @JvmField
+        var gravityFeedforward = 0.0435
 
 
-        //@JvmField
-        var liftCoeffs = PIDCoefficients(0.0, 0.0, 0.0) // TODO: Calculate from kV and kA
+        @JvmField
+        var liftCoeffs = PIDCoefficients(0.2, 0.0, 0.0) // TODO: Calculate from kV and kA
 
-        val liftTargetErrorTolerance = 0.5 // in
+        val liftTargetErrorTolerance = 0.7 // in
 
-        const val withinSwitchRange = 3.0 // in from the bottom to check magnet switch for reset
+        const val withinSwitchRange = 0.5 // in from the bottom to check magnet switch for reset
     }
 
 }

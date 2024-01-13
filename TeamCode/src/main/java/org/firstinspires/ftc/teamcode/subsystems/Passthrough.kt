@@ -138,7 +138,7 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughMinP
         const val leftPassthroughName = "left"
         const val rightPassthroughName = "right"
 
-        const val passthroughMinPosition = 0.01 // empirically determined servo units
+        const val passthroughMinPosition = 0.0 // empirically determined servo units
         const val passthroughMaxPosition = 0.6 // empirically determined servo units
 
         const val passthroughOffsetDistanceFromLift = 0.0

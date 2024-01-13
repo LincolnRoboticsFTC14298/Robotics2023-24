@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.util
 
+import android.util.Log
 import com.acmerobotics.roadrunner.util.NanoClock
 import org.firstinspires.ftc.teamcode.util.PIDCoefficients
 import org.firstinspires.ftc.teamcode.util.epsilonEquals
@@ -25,11 +26,11 @@ class PIDFController
  * @param clock clock
  */
 @JvmOverloads constructor(
-    private val pid: PIDCoefficients,
-    private val kV: Double = 0.0,
-    private val kA: Double = 0.0,
-    private val kStatic: Double = 0.0,
-    private val kF: (Double, Double?) -> Double = { _, _ -> 0.0 },
+    var pid: PIDCoefficients,
+    var kV: Double = 0.0,
+    var kA: Double = 0.0,
+    var kStatic: Double = 0.0,
+    var kF: (Double, Double?) -> Double = { _, _ -> 0.0 },
     private val clock: NanoClock = NanoClock.system()
 ) {
     private var errorSum: Double = 0.0
