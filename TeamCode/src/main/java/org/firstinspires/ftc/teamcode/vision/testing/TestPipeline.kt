@@ -2,9 +2,6 @@ package org.firstinspires.ftc.teamcode.vision.testing
 
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.FieldConfig
-import org.firstinspires.ftc.teamcode.FieldConfig.coneDiameter
-import org.firstinspires.ftc.teamcode.FieldConfig.poleBaseHeight
-import org.firstinspires.ftc.teamcode.FieldConfig.poleDiameter
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
@@ -81,11 +78,11 @@ open class TestPipeline(
     private val blueSingleConeContours = Contours(blueOverlap)
 
     // Results Modules //
-    private val stackResultsModule = ContourResults(stackContours, camera, coneDiameter)
-    private val singleConeResultsModule = ContourResults(singleConeContours, camera, coneDiameter)
-    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, camera, coneDiameter)
-    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, camera, coneDiameter)
-    private val poleResultsModule = ContourResults(poleContours, camera, poleDiameter, poleBaseHeight)
+    private val stackResultsModule = ContourResults(stackContours, camera, FieldConfig.spikeDiameter)
+    private val singleConeResultsModule = ContourResults(singleConeContours, camera, FieldConfig.spikeDiameter)
+    private val redSingleConeResultsModule = ContourResults(redSingleConeContours, camera, FieldConfig.spikeDiameter)
+    private val blueSingleConeResultsModule = ContourResults(blueSingleConeContours, camera, FieldConfig.spikeDiameter)
+    private val poleResultsModule = ContourResults(poleContours, camera, FieldConfig.spikeDiameter, FieldConfig.spikeHeight)
 
     // Data we care about and wish to access
     var stackResults = listOf<ContourResults.AnalysisResult>()

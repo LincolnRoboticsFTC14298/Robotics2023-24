@@ -42,10 +42,10 @@ open class SpikeDetectionPipeline(
     private val rawSpikeContours = Contours(denoisedSpikeMask)
 
     // Spike Mark Scorer //
-    private val spikeConvexityScorer = DiffSquaredScorer(Convexity(), 1.27, 1.04)
-    private val spikeExtentScorer = DiffSquaredScorer(Extent(), 0.89, 5.76)
-    private val spikeSolidityScorer = DiffSquaredScorer(Solidity(), 0.98, 6.6)
-    private val spikeAspectRatioScorer = DiffSquaredScorer(AspectRatio(), 1.27, 0.094)
+    private val spikeConvexityScorer = DiffSquaredScorer(Convexity(), 0.97, 7.3)
+    private val spikeExtentScorer = DiffSquaredScorer(Extent(), 0.89, 7.4)
+    private val spikeSolidityScorer = DiffSquaredScorer(Solidity(), 0.98, 3.2)
+    private val spikeAspectRatioScorer = DiffSquaredScorer(AspectRatio(), 1.1, 0.094)
     private val spikeContours = FilterContours(rawSpikeContours, 0.05, spikeConvexityScorer + spikeExtentScorer + spikeSolidityScorer + spikeAspectRatioScorer)
 
     // Results Modules //

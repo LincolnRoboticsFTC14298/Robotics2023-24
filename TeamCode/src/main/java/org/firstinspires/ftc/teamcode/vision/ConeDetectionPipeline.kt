@@ -2,9 +2,6 @@ package org.firstinspires.ftc.teamcode.vision
 
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.teamcode.FieldConfig
-import org.firstinspires.ftc.teamcode.FieldConfig.coneDiameter
-import org.firstinspires.ftc.teamcode.FieldConfig.poleBaseHeight
-import org.firstinspires.ftc.teamcode.FieldConfig.poleDiameter
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
@@ -38,7 +35,10 @@ open class ConeDetectionPipeline(
     private val inputModule = InputModule()
     //private val undistort = UndistortLens(inputModule, camMat, distCoeffs)
     private val labColorSpace = ColorConverter(inputModule, Imgproc.COLOR_RGB2Lab)
-    private val greenMask = Filter(labColorSpace, Scalar(0.0, 0.0, 0.0), Scalar(255.0, 255.0, 255.0))
+    private val whiteMask = Filter(labColorSpace, Scalar(45.0, -128.0, 68.0), Scalar(100.0, 0.0, .0))
+    private val yellowMask = Filter(labColorSpace, Scalar(45.0, -128.0, 68.0), Scalar(255.0, 105.0, 255.0))
+    private val greenMask = Filter(labColorSpace, Scalar(45.0, -128.0, 68.0), Scalar(255.0, 105.0, 255.0))
+    private val purpleMask = Filter(labColorSpace, Scalar(45.0, -128.0, 68.0), Scalar(255.0, 105.0, 255.0))
     //private val combinedMask = redMask //TODO change back once done testing
     private val denoisedConeMask = Denoise(greenMask, 5, 5, 3, 3)
     private val rawConeContours = Contours(denoisedConeMask)
@@ -51,27 +51,23 @@ open class ConeDetectionPipeline(
     private val singleConeContours = FilterContours(rawConeContours, 0.05, singleConeConvexityScorer + singleConeExtentScorer + singleConeSolidityScorer + singleConeAspectRatioScorer)
 
     // Single Color Mask and Single Cone Overlap //
-    private val redOverlap = MaskOverlap(ContourToMask(singleConeContours), greenMask)
-    private val greenSingleConeContours = Contours(redOverlap)
+
 
     // Results Modules //
-    private val singleConeResultsModule = ContourResults(singleConeContours, camera, coneDiameter)
-    private val greenSingleConeResultsModule = ContourResults(greenSingleConeContours, camera, coneDiameter)
+    private val singleConeResultsModule = ContourResults(singleConeContours, camera, FieldConfig.spikeDiameter)
 
 
     // Data we care about and wish to access
     var singleConeResults = listOf<ContourResults.AnalysisResult>()
-    var greenSingleConeResults = listOf<ContourResults.AnalysisResult>()
 
     init {
-        addEndModules(singleConeResultsModule, greenSingleConeResultsModule)
+        addEndModules(singleConeResultsModule)
     }
 
     override fun processFrameForCache(input: Mat) : Mat {
 
         // Get the data we want (yipee)
         singleConeResults = singleConeResultsModule.processFrame(input)
-        greenSingleConeResults = greenSingleConeResultsModule.processFrame(input)
 
 
         // Telemetry for Testing //
@@ -97,14 +93,6 @@ open class ConeDetectionPipeline(
 
             DisplayMode.ALL_CONTOURS -> {
                 drawContours(input, rawConeContours.processFrame(input), -1, Scalar(0.0, 255.0, 0.0), 1) //Green for other cone contours
-
-                drawContours(input, greenSingleConeContours.processFrame(input), -1, Scalar(255.0, 0.0, 0.0), 1) //Red for single red cone contours
-                //drawContours(input, singleConeContours.processFrame(input), -1, Scalar(0.0, 0.0, 255.0), 2) //Blue for single cone contours
-
-
-
-                //drawContours(input, singleConeContours.processFrame(input), -1, Scalar(0.0, 255.0, 0.0), 1) //green for other contours
-
 
                 input
             }

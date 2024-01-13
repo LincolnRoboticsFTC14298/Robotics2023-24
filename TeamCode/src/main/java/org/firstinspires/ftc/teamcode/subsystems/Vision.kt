@@ -19,6 +19,7 @@ import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.MatOfDouble
 import org.openftc.apriltag.AprilTagDetection
+import org.openftc.apriltag.AprilTagPose
 import org.openftc.easyopencv.OpenCvCamera
 import org.openftc.easyopencv.OpenCvCamera.AsyncCameraOpenListener
 import org.openftc.easyopencv.OpenCvCameraFactory
@@ -143,25 +144,10 @@ class Vision(
         dashboard.stopCameraStream()
     }
 
+
     /**
-     * Starts streaming the rear camera.
-
-    fun startStreamingRearCamera() {
-        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT)
-        dashboard.startCameraStream(phoneCam, 10.0)
-    }
-
-
-     * Stops streaming the rear camera.
-
-    fun stopStreamingRearCamera() {
-        phoneCam.stopStreaming()
-        dashboard.startCameraStream(webCam, 10.0)
-    }
-    */
-    /**
-     * Sets the rear pipeline.
-     * @param pipeline     From the [RearPipeline] pipeline options.
+     * Sets the front pipeline.
+     * @param pipeline     From the [FrontPipeline] pipeline options.
      */
     fun setFrontPipeline(pipeline: FrontPipeline) {
         webCam.setPipeline(pipeline.pipeline)
@@ -173,7 +159,7 @@ class Vision(
     private val DECIMATION_LOW = 2f
     private val THRESHOLD_HIGH_DECIMATION_RANGE_FEET = 3.0f
     private val THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION = 4
-    fun updateAprilTag() : AprilTagResult? {
+    fun updateAprilTag() : ArrayList<AprilTagDetection>? {
         // Calling getDetectionsUpdate() will only return an object if there was a new frame
         // processed since the last time we called it. Otherwise, it will return null. This
         // enables us to only run logic when there has been a new frame, as opposed to the
@@ -201,10 +187,21 @@ class Vision(
                 if (detections[0].pose.z < THRESHOLD_HIGH_DECIMATION_RANGE_FEET) {
                     aprilTagDetectionPipeline.setDecimation(DECIMATION_HIGH)
                 }
-                return AprilTagResult.find(detections.minBy{ it.pose.z }.id)
+
+                return detections//AprilTagResult.find(detections.minBy{ it.pose.z }.id)
             }
         }
 
+        return null
+    }
+
+    fun getLeftAprilTag(redTeam: Boolean) : AprilTagPose? {
+        val tags = updateAprilTag()
+        for (tag in tags!!) {
+            if (tag.id == (if(redTeam){AprilTagResult.BACKDROP_LEFT_RED.id}else{AprilTagResult.BACKDROP_LEFT_BLUE.id})) {
+                return tag.pose
+            }
+        }
         return null
     }
 
@@ -250,10 +247,26 @@ class Vision(
 
     fun getSpikeInfo(): List<ObservationResult> = getSpikeMarkDetections().map{ it + CameraData.LOGITECH_C920.relativePosition }
 
-    fun getSpikeMarkDirection() {
+    val leftSpikeCutoff = -350.0;
+    val rightSpikeCutoff = 4.0;
+
+    enum class SpikeDirection() {
+        LEFT(),
+        CENTER(),
+        RIGHT()
+    }
+
+    fun getSpikeMarkDirection(): SpikeDirection {
         val spike =  getSpikeInfo().minByOrNull { it.distance }
-        val xCoord = spike?.toVector()?.x
-        //TODO finish
+        val xCoord = spike!!.toVector().x
+
+        if (xCoord > rightSpikeCutoff) {
+            return SpikeDirection.RIGHT
+        } else if (xCoord > leftSpikeCutoff) {
+            return SpikeDirection.CENTER
+        } else {
+            return SpikeDirection.LEFT
+        }
     }
 
     private fun drawObservationResult(canvas: Canvas, observation: ObservationResult, pose: Pose2d, radius: Double, fill: Boolean = true) {

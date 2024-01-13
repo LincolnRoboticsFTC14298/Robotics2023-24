@@ -17,7 +17,7 @@ class ApproachPoleFromAngle(
             // Drive normally until a cone has been detected
             ApproachAngle(
                 mecanum,
-                { vision.getClosestPole()?.angle },
+                    { 0.0 }, //{ vision.getClosestPole()?.angle },
                 input
             ),
         )

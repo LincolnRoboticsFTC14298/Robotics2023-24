@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.util.poseToMatrix
 
 // TODO: Multiple instances of localizer will be created please fix oh god.
+/**
 class MecanumMonteCarloLocalizer(
     hwMap: HardwareMap,
     private val vision: Vision,
@@ -48,9 +49,9 @@ class MecanumMonteCarloLocalizer(
         timer.reset()
     }
 
-    fun update() {
-        particleFilter.update(observationsToMatrix(vision.getLandmarkInfo()))
-    }
+    //fun update() {
+    //    particleFilter.update(observationsToMatrix(vision.getLandmarkInfo()))
+    //}
 
     private fun observationsToMatrix(observations: List<Vision.ObservationResult>) : SimpleMatrix {
         val observationsArray = observations.map { doubleArrayOf(it.angle, it.distance)}.toTypedArray()
@@ -58,3 +59,4 @@ class MecanumMonteCarloLocalizer(
     }
 
 }
+*/
