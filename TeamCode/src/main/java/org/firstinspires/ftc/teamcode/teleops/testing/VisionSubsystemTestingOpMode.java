@@ -26,33 +26,13 @@ import java.util.ArrayList;
 @TeleOp
 public class VisionSubsystemTestingOpMode extends OpMode {
     Vision visionSubsystem;
-    OpenCvCamera camera;
-    private FtcDashboard dashboard = FtcDashboard.getInstance();
-    Telemetry doubleTelemetry = new MultipleTelemetry(telemetry, dashboard.getTelemetry());
-
-    Companion.CameraData cameraData;
-
 
     @Override
     public void init() {
-        cameraData = Companion.CameraData.LOGITECH_C920;
-        visionSubsystem = new Vision(hardwareMap, Vision.FrontPipeline.APRIL_TAG, doubleTelemetry);
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                camera.startStreaming(640, 360); //1920, 1080
+        visionSubsystem = new Vision(hardwareMap, Vision.FrontPipeline.APRIL_TAG, telemetry);
 
-            }
 
-            @Override
-            public void onError(int errorCode) {
-
-            }
-        });
-        dashboard.startCameraStream(camera, 10.0);
     }
 
     @SuppressLint("DefaultLocale")
@@ -67,7 +47,11 @@ public class VisionSubsystemTestingOpMode extends OpMode {
 
 
         // If there's been a new frame...
-        doubleTelemetry.addData("Position", position);
-        doubleTelemetry.update();
+        if (position != null) {
+            telemetry.addData("Position x", position.x);
+            telemetry.addData("Position y", position.y);
+            telemetry.addData("Position z", position.z);
+            telemetry.update();
+        }
     }
 }

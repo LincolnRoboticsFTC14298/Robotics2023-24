@@ -88,14 +88,14 @@ class Vision(
         SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, true, telemetry))
     }
 
-    val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.PHONECAM, telemetry)
+    //val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.PHONECAM, telemetry)
 
     init {
         name = "Vision Subsystem"
 
-        (FrontPipeline.SPIKE_PIPELINE.pipeline as GeneralPipeline).telemetry = telemetry
+        (FrontPipeline.SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).telemetry = telemetry
 
-        // Open cameras asynchronously and load the pipelines
+        // Open cameras asyncgehronously and load the pipelines
         /**
         phoneCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
@@ -112,12 +112,14 @@ class Vision(
         })
         */
 
+
         webCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
                 webCam.setPipeline(startingPipeline.pipeline)
                 webCam.showFpsMeterOnViewport(true)
-                webCam.setViewportRenderer(OpenCvCamera.ViewportRenderer.GPU_ACCELERATED)
+                //webCam.setViewportRenderer(OpenCvCamera.ViewportRenderer.NATIVE_VIEW)
                 startStreamingFrontCamera()
+
             }
 
             override fun onError(errorCode: Int) {
@@ -197,9 +199,15 @@ class Vision(
 
     fun getLeftAprilTag(redTeam: Boolean) : AprilTagPose? {
         val tags = updateAprilTag()
-        for (tag in tags!!) {
-            if (tag.id == (if(redTeam){AprilTagResult.BACKDROP_LEFT_RED.id}else{AprilTagResult.BACKDROP_LEFT_BLUE.id})) {
-                return tag.pose
+        if (tags != null) {
+            for (tag in tags) {
+                if (tag.id == (if (redTeam) {
+                            AprilTagResult.BACKDROP_LEFT_RED.id
+                        } else {
+                            AprilTagResult.BACKDROP_LEFT_BLUE.id
+                        })) {
+                    return tag.pose
+                }
             }
         }
         return null
