@@ -53,13 +53,25 @@ class DualClaw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition
         //colorSensor.gain = colorGain.toFloat()
         setpoint = startingPosition
         servo.position = startingPosition
-        DualClawState.CLOSED
+        clawState = DualClawState.CLOSED
     }
 
     override fun periodic() {
         Log.v("Claw estimated angle", getPositionEstimate().toString())
         //servo.position = motionProfile[timer.seconds()].value()
         servo.position = setpoint
+    }
+
+    fun releaseFirst() {
+        setpoint = clawPartiallyOpenedPosition
+        clawState = DualClawState.PARTIAL
+    }
+
+    fun releaseSecond() {
+        if(clawState == DualClawState.PARTIAL) {
+            setpoint = clawReleasePosition
+            clawState = DualClawState.FULL
+        }
     }
 
     /**
@@ -87,10 +99,22 @@ class DualClaw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition
      */
 
     fun incramentOpen() {
-        setpoint = if (clawState == DualClawState.CLOSED) {
-            clawPartiallyOpenedPosition
+        if (clawState == DualClawState.CLOSED) {
+            setpoint = clawPartiallyOpenedPosition
+            clawState = DualClawState.PARTIAL
         } else {
-            clawOpenedPosition
+            setpoint = clawOpenedPosition
+            clawState = DualClawState.FULL
+        }
+    }
+
+    fun incramentClosed() {
+        if (clawState == DualClawState.FULL) {
+            setpoint = clawPartiallyOpenedPosition
+            clawState = DualClawState.PARTIAL
+        } else {
+            setpoint = clawClosedPosition
+            clawState = DualClawState.CLOSED
         }
     }
 
@@ -141,11 +165,13 @@ class DualClaw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition
         const val colorSensorName = "color"
 
         @JvmField
-        var clawClosedPosition = 0.05
+        var clawClosedPosition = 0.01
         @JvmField
-        var clawOpenedPosition = 0.15
+        var clawPartiallyOpenedPosition = 0.15
         @JvmField
-        var clawPartiallyOpenedPosition = 0.80
+        var clawOpenedPosition = 0.45
+        @JvmField
+        var clawReleasePosition = 0.25
 
 
         @JvmField

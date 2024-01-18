@@ -37,7 +37,7 @@ class ManualLiftFeedforwardTuner : OpMode() {
         voltageSensor.periodic()
 
         lift.updateController()
-        lift.tuningPeriodic()
+        lift.periodic()
 
         val p = TelemetryPacket()
         lift.fetchTelemetry(p)

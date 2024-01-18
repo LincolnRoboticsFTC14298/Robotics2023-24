@@ -9,6 +9,8 @@ import com.arcrobotics.ftclib.hardware.ServoEx
 import com.arcrobotics.ftclib.hardware.SimpleServo
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.teamcode.util.epsilonEquals
+import java.lang.Math.random
 import java.lang.Math.toRadians
 import kotlin.math.cos
 import kotlin.math.sign
@@ -21,7 +23,7 @@ import kotlin.math.sign
  * @param hwMap             HardwareMap
  */
 @Config
-class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughMinPosition) : SubsystemBase() {
+class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalfwayPosition) : SubsystemBase() {
 
     /**
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware">FTCLib Docs: Hardware</a>
@@ -44,14 +46,19 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughMinP
 
     private var displacement: Double = 0.0
 
-    var setpoint: Double = 0.0
+    var setpoint: Double = 0.0 //random() / 50.0 //TODO fucking cursed fix later
         set(position) {
-            if (field != position) { //TODO replace with (displacement != 0.0) in case position != getPositionEstimate???
+            Log.v("setpoint attempt", setpoint.toString())
+            displacement = position - getPositionEstimate()
+            if (!(displacement epsilonEquals 0.0)) {
                 field = position //TODO Range.clip like in claw & lift
-                displacement = field - getPositionEstimate()
                 timer.reset()
                 motionProfile = TimeProfile(constantProfile(kotlin.math.abs(displacement), 0.0, passthroughMaxVel, -passthroughMaxAccel, passthroughMaxAccel).baseProfile)
                 Log.i("Passthrough desired position", setpoint.toString())
+            } else {
+                field = position //TODO Range.clip like in claw & lift
+                timer.reset()
+                motionProfile = TimeProfile(constantProfile(kotlin.math.abs(0.01), 0.0, passthroughMaxVel, -passthroughMaxAccel, passthroughMaxAccel).baseProfile)
             }
         }
 
@@ -86,6 +93,10 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughMinP
      */
     fun pickUp() {
         setpoint = passthroughPickUpPosition
+    }
+
+    fun halfway() {
+        setpoint = passthroughHalfwayPosition
     }
 
     fun setPosition(position: Double) {
@@ -147,6 +158,8 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughMinP
         var passthroughPickUpPosition = passthroughMinPosition
         @JvmField
         var passthroughDepositPosition = passthroughMaxPosition
+        @JvmField
+        var passthroughHalfwayPosition = 0.14
         @JvmField
         var passthroughJunctionAngle = -15.0
 

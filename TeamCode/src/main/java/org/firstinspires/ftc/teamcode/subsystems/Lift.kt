@@ -81,7 +81,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         val processModel = ConstantAccelerationProcessModel()
 
         val H = SimpleMatrix(arrayOf(doubleArrayOf(1.0, 0.0, 0.0), doubleArrayOf(0.0, 1.0, 0.0)))
-        val R = SimpleMatrix(arrayOf(doubleArrayOf(0.5, 0.0), doubleArrayOf(0.0, 2.0)))
+        val R = SimpleMatrix(arrayOf(doubleArrayOf(0.00001, 0.0), doubleArrayOf(0.0, 0.001)))
         val measurementModel = LinearMeasurementModel(H, R)
 
         // Retracted and stationary
@@ -213,6 +213,10 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         lastPosition = pos
     }
 
+    fun setHeightLastPos() {
+        setHeight(lastPosition)
+    }
+
     /**
      * Retracts the lift to the starting height.
      */
@@ -285,7 +289,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
      * @return True if the controller has reached the target with some tolerance.
      */
     fun atTarget(): Boolean {
-        return abs(getExtensionLength() - setpoint) < liftTargetErrorTolerance
+        return abs(getRawExtensionLength() - setpoint) < liftTargetErrorTolerance
     }
 
 
@@ -332,9 +336,9 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         const val liftAngle = 36.98 // deg
 
         @JvmField
-        var lowHeight = 10.0
+        var lowHeight = 14.0
         @JvmField
-        var midHeight = 17.5
+        var midHeight = 20.0
         @JvmField
         var highHeight = 25.0
 
@@ -346,7 +350,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         @JvmField
         var liftKStatic = 0.1397
         @JvmField
-        var liftKV = 0.05
+        var liftKV = 0.057
         @JvmField
         var liftKA = 0.0035
         @JvmField
