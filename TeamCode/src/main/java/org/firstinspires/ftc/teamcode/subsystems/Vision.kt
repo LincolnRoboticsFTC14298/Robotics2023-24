@@ -85,7 +85,7 @@ class Vision(
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
         APRIL_TAG(AprilTagDetectionPipeline(CameraData.LOGITECH_C920)),
-        SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, true, telemetry))
+        SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, true, telemetry)) //TODO add logic to get the current alliance color
     }
 
     //val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.PHONECAM, telemetry)
@@ -95,8 +95,8 @@ class Vision(
 
         (FrontPipeline.SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).telemetry = telemetry
 
-        // Open cameras asyncgehronously and load the pipelines
-        /**
+        // Open cameras asynghronously and load the pipelines
+        /*
         phoneCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
             override fun onOpened() {
                 phoneCam.setPipeline(phoneCamPipeline)
@@ -255,7 +255,7 @@ class Vision(
 
     fun getSpikeInfo(): List<ObservationResult> = getSpikeMarkDetections().map{ it + CameraData.LOGITECH_C920.relativePosition }
 
-    val leftSpikeCutoff = -350.0;
+    val leftSpikeCutoff = -350.0; //TODO verify these values
     val rightSpikeCutoff = 4.0;
 
     enum class SpikeDirection() {

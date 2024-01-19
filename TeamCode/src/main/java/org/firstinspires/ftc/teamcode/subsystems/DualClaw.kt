@@ -157,7 +157,7 @@ class DualClaw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition
                 clawOffset
             )
         )
-        canvas.fillCircle(x, y, FieldConfig.coneDiameter / 2.0 * 1.2)
+        canvas.fillCircle(x, y, 2.0) //TODO measure claw radius
     }
 
     companion object {

@@ -214,10 +214,13 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
      *  Maybe use the velocity vector as well.
      * @return Gets the pole the robot is facing by minimizing the difference of heading.
      */
-    //*fun getFacingPole(): FieldConfig.Pole {
+
+    //NOTE - 1/18/24 - the way this was commented out was changed
+
+    /*fun getFacingPole(): FieldConfig.Pole {
         val headVec = pose.heading.vec()
         val posVec = pose.position
-
+*/
         /*
         val minX = floor(posVec.x / RobotConfig.tileSize)
         val minY = floor(posVec.y / RobotConfig.tileSize)
