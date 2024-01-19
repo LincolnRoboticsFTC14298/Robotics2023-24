@@ -214,7 +214,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
      *  Maybe use the velocity vector as well.
      * @return Gets the pole the robot is facing by minimizing the difference of heading.
      */
-    fun getFacingPole(): FieldConfig.Pole {
+    //*fun getFacingPole(): FieldConfig.Pole {
         val headVec = pose.heading.vec()
         val posVec = pose.position
 
@@ -242,7 +242,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
                 }
             }
         }
-        */
+
 
         return enumValues<FieldConfig.Pole>().maxBy {
             val diff = it.vector.minus(posVec)
@@ -264,7 +264,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         }
     }
 
-
+*/
     inner class FollowTrajectoryAction(private val timeTrajectory: TimeTrajectory) : Action {
         private var beginTs = -1.0
         private val xPoints: DoubleArray

@@ -76,6 +76,16 @@ class Launcher(hwMap: HardwareMap) : SubsystemBase() {
         packet.put("Desired position", setpoint)
     }
 
+    fun drawClaw(canvas: Canvas, clawOffset: Vector2d, pose: Pose2d) {
+        canvas.setStroke("#8CA231")
+        val (x, y) = pose.position.plus(
+            pose.heading.inverse().times(
+                clawOffset
+            )
+        )
+        canvas.fillCircle(x, y, FieldConfig.spikeDiameter / 2.0 * 1.2)
+    }
+
     companion object {
         const val launcherServoName = "launcher"
 

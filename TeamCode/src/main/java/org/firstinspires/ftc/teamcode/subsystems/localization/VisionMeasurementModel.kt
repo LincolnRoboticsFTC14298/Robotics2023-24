@@ -8,8 +8,9 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.subsystems.Vision.ObservationResult
 import org.firstinspires.ftc.teamcode.util.matrixToVector
 import kotlin.math.*
-
+/**
 class VisionMeasurementModel(private val camera: Vision.Companion.CameraData) : ProbabilisticMeasurementModel {
+
     override fun calculateProbability(z: SimpleMatrix, state: SimpleMatrix): Double {
         var probability = 1.0
 
@@ -69,3 +70,4 @@ class VisionMeasurementModel(private val camera: Vision.Companion.CameraData) : 
     }
 
 }
+*/
