@@ -155,7 +155,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         val parameters = IMU.Parameters(
             RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
             )
         )
 
@@ -471,49 +471,49 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
         // drive model parameters
         @JvmField
-        var IN_PER_TICK = 90.0 / 171923.0 //72.0 / 135426.0
+        var IN_PER_TICK = 73.0 / 137145.0 //90.0 / 171923.0 //72.0 / 135426.0
         @JvmField
-        var LATERAL_IN_PER_TICK = IN_PER_TICK
+        var LATERAL_IN_PER_TICK = 0.000318 //0.00042 //IN_PER_TICK
         @JvmField
         var LATERAL_MULTIPLIER = 1.0
         @JvmField
-        var TRACK_WIDTH_TICKS = 47133.00826222479
+        var TRACK_WIDTH_TICKS = 28310.0 //47133.00826222479
 
         // feedforward parameters
         @JvmField
-        var kS = 0.85 //1.3704012088907165
+        var kS = 0.5 //0.6 //1.22 //0.85 //1.3704012088907165 //TODO maybe change to 2.0
         @JvmField
-        var kV = 0.000111 //0.00009412030525896 //1.0 / rpmToVelocity(MAX_RPM)
+        var kV = 0.000089 //0.000092 //0.000103 //0.000111 //0.00009412030525896 //1.0 / rpmToVelocity(MAX_RPM)
         @JvmField
-        var kA = 0.0000180762925878
+        var kA = 0.000025 //0.000028 //0.000015 //0.0000180762925878
 
         // path profile parameters
         @JvmField
-        var MAX_WHEEL_VEL = (MAX_RPM / 60.0) * GEAR_RATIO * WHEEL_RADIUS * 2 * Math.PI * 0.85
+        var MAX_WHEEL_VEL = 50.0 //(MAX_RPM / 60.0) * GEAR_RATIO * WHEEL_RADIUS * 2 * Math.PI * 0.85 //TODO check to see how accurate the max of 50 is compared to the theoretical, test to see if it's too high
         @JvmField
         var MIN_PROFILE_ACCEL = -30.0
         @JvmField
-        var MAX_PROFILE_ACCEL = MAX_WHEEL_VEL
+        var MAX_PROFILE_ACCEL = 50.0 //MAX_WHEEL_VEL
 
         // turn profile parameters
         @JvmField
-        var MAX_ANG_VEL = MAX_WHEEL_VEL / TRACK_WIDTH // shared with path
+        var MAX_ANG_VEL = 1.5 //MAX_WHEEL_VEL / TRACK_WIDTH // shared with path
         @JvmField
         var MAX_ANG_ACCEL = MAX_ANG_VEL
 
         // path controller gains
         @JvmField
-        var AXIAL_GAIN = 0.0
+        var AXIAL_GAIN = 5.0
         @JvmField
-        var LATERAL_GAIN = 0.0
+        var LATERAL_GAIN = 5.0
         @JvmField
-        var HEADING_GAIN = 0.0 // shared with turn
+        var HEADING_GAIN = 4.0 // shared with turn
         @JvmField
-        var AXIAL_VEL_GAIN = 0.0
+        var AXIAL_VEL_GAIN = 1.0
         @JvmField
-        var LATERAL_VEL_GAIN = 0.0
+        var LATERAL_VEL_GAIN = 0.5
         @JvmField
-        var HEADING_VEL_GAIN = 0.0 // shared with turn
+        var HEADING_VEL_GAIN = 0.5 // shared with turn
 
         private fun rpmToVelocity(rpm: Double) =
             rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0
