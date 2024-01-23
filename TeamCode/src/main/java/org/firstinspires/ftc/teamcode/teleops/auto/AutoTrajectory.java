@@ -4,12 +4,10 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
-import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor;
-import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer;
-
+@Autonomous
 public class AutoTrajectory extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -17,9 +15,7 @@ public class AutoTrajectory extends LinearOpMode {
         Pose2d blueLeftStartingPose = new Pose2d(-45, 12, 0);
         Pose2d redLeftStartingPose = new Pose2d(45, -36, 180);
         Pose2d redRightStartingPose = new Pose2d(45, 12, 180);
-        OdometryLocalizer localizer = new OdometryLocalizer(hardwareMap);
-        VoltageSensor voltageSensor = new VoltageSensor(hardwareMap);
-        MecanumDrive drive = new MecanumDrive(hardwareMap, blueRightStartingPose, localizer, voltageSensor, telemetry);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, blueRightStartingPose);
 
         Action blueRight = drive.actionBuilder(blueRightStartingPose)
                 .setTangent(180)
