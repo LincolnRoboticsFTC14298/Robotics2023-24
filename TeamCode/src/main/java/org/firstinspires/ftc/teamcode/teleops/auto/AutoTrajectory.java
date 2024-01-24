@@ -11,14 +11,28 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class AutoTrajectory extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        Pose2d blueRightStartingPose = new Pose2d(-45, -36, 0);
+
+        //Pose2d blueRightStartingPose = new Pose2d(-45, -36, 0);    //old version (no 1st part)
+
+        Pose2d blueRightStartingPose = new Pose2d(-63, -36, -180);
         Pose2d blueLeftStartingPose = new Pose2d(-45, 12, 0);
         Pose2d redLeftStartingPose = new Pose2d(45, -36, 180);
         Pose2d redRightStartingPose = new Pose2d(45, 12, 180);
         MecanumDrive drive = new MecanumDrive(hardwareMap, blueRightStartingPose);
 
+//        Action blueRight = drive.actionBuilder(blueRightStartingPose)
+//                .setTangent(180)
+//                .splineToLinearHeading(new Pose2d(-60, 12, -90), 90)
+//                .splineToLinearHeading(new Pose2d(-36, 36, -90), 90)
+//                .splineToConstantHeading(new Vector2d(-60, 48), 90)
+//                .splineToConstantHeading(new Vector2d(-60, 60), 90)
+//                .build();
+//        old version (no 1st part)
+
         Action blueRight = drive.actionBuilder(blueRightStartingPose)
-                .setTangent(180)
+                .setTangent(-90)
+                .splineToConstantHeading(new Vector2d(-57, -42), 0)
+                .splineToLinearHeading(new Pose2d(-45, -36, 0), 180)
                 .splineToLinearHeading(new Pose2d(-60, 12, -90), 90)
                 .splineToLinearHeading(new Pose2d(-36, 36, -90), 90)
                 .splineToConstantHeading(new Vector2d(-60, 48), 90)
