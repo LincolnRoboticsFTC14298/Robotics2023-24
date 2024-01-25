@@ -13,11 +13,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class AutoTrajectory extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-
         Pose2d blueRightStartingPose = new Pose2d(-63, -36, toRadians(-180));
         Pose2d blueLeftStartingPose = new Pose2d(-63, 12, toRadians(-180));
         Pose2d redLeftStartingPose = new Pose2d(63, -36, toRadians(0));
         Pose2d redRightStartingPose = new Pose2d(63, 12, toRadians(0));
+
         MecanumDrive drive = new MecanumDrive(hardwareMap, blueRightStartingPose);
 
         Action blueRight = drive.actionBuilder(blueRightStartingPose)
