@@ -471,13 +471,13 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
         // drive model parameters
         @JvmField
-        var IN_PER_TICK = 73.0 / 137145.0 //90.0 / 171923.0 //72.0 / 135426.0
+        var IN_PER_TICK = 73.0 / 137145.0 //90.0 / 171923.0 //72.0 / 135426.0 //TODO maybe change to 0.00053228335?
         @JvmField
         var LATERAL_IN_PER_TICK = 0.000318 //0.00042 //IN_PER_TICK
         @JvmField
         var LATERAL_MULTIPLIER = 1.0
         @JvmField
-        var TRACK_WIDTH_TICKS = 28310.0 //47133.00826222479
+        var TRACK_WIDTH_TICKS = 35000 //28310.0 //47133.00826222479
 
         // feedforward parameters
         @JvmField
