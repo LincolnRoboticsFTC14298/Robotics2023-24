@@ -31,7 +31,7 @@ public class AutoTrajectory extends LinearOpMode {
                 .build();
 
         Action blueLeft = drive.actionBuilder(blueLeftStartingPose)
-                .setTangent(toRadians(-90))
+                .setTangent(toRadians(90))
                 .splineToConstantHeading(new Vector2d(-57, 18), toRadians(0))
                 .splineToLinearHeading(new Pose2d(-45, 12, 0), toRadians(-15))
                 .splineToLinearHeading(new Pose2d(-36, 36, toRadians(-90)), toRadians(90))
@@ -50,7 +50,7 @@ public class AutoTrajectory extends LinearOpMode {
                 .build();
 
         Action redRight = drive.actionBuilder(redRightStartingPose)
-                .setTangent(toRadians(-90))
+                .setTangent(toRadians(90))
                 .splineToConstantHeading(new Vector2d(57, 18), toRadians(180))
                 .splineToLinearHeading(new Pose2d(45, 12, 180), toRadians(165))
                 .splineToLinearHeading(new Pose2d(36, 36, toRadians(90)), toRadians(90))

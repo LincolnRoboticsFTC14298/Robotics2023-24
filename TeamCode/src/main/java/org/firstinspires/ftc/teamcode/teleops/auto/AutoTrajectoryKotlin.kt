@@ -27,7 +27,7 @@ class AutoTrajectoryKotlin : LinearOpMode() {
                 .build()
 
         val blueLeft = drive.actionBuilder(blueLeftStartingPose)
-                .setTangent(Math.toRadians(-90.0))
+                .setTangent(Math.toRadians(90.0))
                 .splineToConstantHeading(Vector2d(-57.0, 18.0), Math.toRadians(0.0))
                 .splineToLinearHeading(Pose2d(-45.0, 12.0, 0.0), Math.toRadians(-15.0))
                 .splineToLinearHeading(Pose2d(-36.0, 36.0, Math.toRadians(-90.0)), Math.toRadians(90.0))
@@ -46,7 +46,7 @@ class AutoTrajectoryKotlin : LinearOpMode() {
                 .build()
 
         val redRight = drive.actionBuilder(redRightStartingPose)
-                .setTangent(Math.toRadians(-90.0))
+                .setTangent(Math.toRadians(90.0))
                 .splineToConstantHeading(Vector2d(57.0, 18.0), Math.toRadians(180.0))
                 .splineToLinearHeading(Pose2d(45.0, 12.0, 180.0), Math.toRadians(165.0))
                 .splineToLinearHeading(Pose2d(36.0, 36.0, Math.toRadians(90.0)), Math.toRadians(90.0))
