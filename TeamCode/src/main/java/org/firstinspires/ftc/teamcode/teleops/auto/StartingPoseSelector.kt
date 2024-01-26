@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPose
 import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorage
 
 
@@ -15,19 +16,19 @@ class StartingPoseSelector() : OpMode() {
 
     override fun loop() {
         if (gamepad1.a) {
-            StartingPoseStorage.startingPose = AutoTrajectoryKotlin.StartingPose.BLUE_RIGHT
+            StartingPoseStorage.startingPose = StartingPose.BLUE_RIGHT
         }
 
         if (gamepad1.b) {
-            StartingPoseStorage.startingPose = AutoTrajectoryKotlin.StartingPose.BLUE_LEFT
+            StartingPoseStorage.startingPose = StartingPose.BLUE_LEFT
         }
 
         if (gamepad1.x) {
-            StartingPoseStorage.startingPose = AutoTrajectoryKotlin.StartingPose.RED_RIGHT
+            StartingPoseStorage.startingPose = StartingPose.RED_RIGHT
         }
 
         if (gamepad1.y) {
-            StartingPoseStorage.startingPose = AutoTrajectoryKotlin.StartingPose.RED_LEFT
+            StartingPoseStorage.startingPose = StartingPose.RED_LEFT
         }
 
         if (gamepad1.right_bumper) {
