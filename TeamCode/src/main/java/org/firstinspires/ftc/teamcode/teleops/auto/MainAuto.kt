@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorag
 
 
 @Autonomous
-class AutoTrajectoryKotlin : LinearOpMode() {
+class MainAuto : LinearOpMode() {
     override fun runOpMode() {
         val drive = MecanumDrive(hardwareMap, StartingPoseStorage.startingPose.pose)
 
@@ -65,10 +65,18 @@ class AutoTrajectoryKotlin : LinearOpMode() {
         if (isStopRequested) return
 
         when (StartingPoseStorage.startingPose) {
-            StartingPose.BLUE_RIGHT -> runBlocking(blueRight)
-            StartingPose.BLUE_LEFT -> runBlocking(blueLeft)
-            StartingPose.RED_RIGHT -> runBlocking(redRight)
-            StartingPose.RED_LEFT -> runBlocking(redLeft)
+            StartingPose.BLUE_RIGHT -> {
+                runBlocking(blueRight)
+            }
+            StartingPose.BLUE_LEFT -> {
+                runBlocking(blueLeft)
+            }
+            StartingPose.RED_RIGHT -> {
+                runBlocking(redRight)
+            }
+            StartingPose.RED_LEFT -> {
+                runBlocking(redLeft)
+            }
         }
     }
 }

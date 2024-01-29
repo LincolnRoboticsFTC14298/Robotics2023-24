@@ -1,17 +1,21 @@
-package org.firstinspires.ftc.teamcode.teleops.auto;
+package org.firstinspires.ftc.teamcode.teleops.testing;
 
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.teamcode.teleops.auto.MecanumDrive;
 
 
 /**
  * Reference code for enum use. Change into Kotlin!
  */
 
+@Disabled
 @Autonomous
 public class AutoTrajectoryEnum extends LinearOpMode {
 

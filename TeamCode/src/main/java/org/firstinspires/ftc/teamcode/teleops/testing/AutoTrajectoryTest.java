@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teleops.auto;
+package org.firstinspires.ftc.teamcode.teleops.testing;
 
 import static java.lang.Math.toRadians;
 
@@ -7,10 +7,14 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.teleops.auto.MecanumDrive;
+
+@Disabled
 @Autonomous
-public class AutoTrajectory extends LinearOpMode {
+public class AutoTrajectoryTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Pose2d blueRightStartingPose = new Pose2d(-63, -36, toRadians(-180));
