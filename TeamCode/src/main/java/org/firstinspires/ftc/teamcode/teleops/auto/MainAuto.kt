@@ -119,6 +119,8 @@ class MainAuto : LinearOpMode() {
                     Vision.SpikeDirection.CENTER -> runBlocking(blueRightBackdropCenter)
                     Vision.SpikeDirection.RIGHT -> runBlocking(blueRightBackdropRight)
                 }
+
+                runBlocking(blueRight3) // Finish path
                  */
             }
 
