@@ -144,8 +144,8 @@ class Vision(
     fun stopStreamingFrontCamera() {
         webCam.stopStreaming()
         dashboard.stopCameraStream()
+        lastSpikeFrame = 0
     }
-
 
     /**
      * Sets the front pipeline.
@@ -264,17 +264,23 @@ class Vision(
         RIGHT()
     }
 
-    fun getSpikeMarkDirection(): SpikeDirection {
-        val spike =  getSpikeInfo().minByOrNull { it.distance }
-        val xCoord = spike!!.toVector().x
+    var lastSpikeFrame = 0
+    fun getSpikeMarkDirectionUpdate(): SpikeDirection? {
+        if (lastSpikeFrame != webCam.frameCount) {
+            lastSpikeFrame = webCam.frameCount
+            val spike = getSpikeInfo().minByOrNull { it.distance }
+            val xCoord = spike!!.toVector().x
 
-        if (xCoord > rightSpikeCutoff) {
-            return SpikeDirection.RIGHT
-        } else if (xCoord > leftSpikeCutoff) {
-            return SpikeDirection.CENTER
-        } else {
-            return SpikeDirection.LEFT
+            return if (xCoord > rightSpikeCutoff) {
+                SpikeDirection.RIGHT
+            } else if (xCoord > leftSpikeCutoff) {
+                SpikeDirection.CENTER
+            } else {
+                SpikeDirection.LEFT
+            }
         }
+
+        return null
     }
 
     private fun drawObservationResult(canvas: Canvas, observation: ObservationResult, pose: Pose2d, radius: Double, fill: Boolean = true) {
