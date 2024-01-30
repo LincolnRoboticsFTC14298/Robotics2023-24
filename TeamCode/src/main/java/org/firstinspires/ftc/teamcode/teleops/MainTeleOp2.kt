@@ -17,6 +17,7 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.commands.drive.SimpleJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.DualClaw
+import org.firstinspires.ftc.teamcode.subsystems.Launcher
 import org.firstinspires.ftc.teamcode.subsystems.Lift
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough
@@ -33,6 +34,7 @@ class MainTeleOp2  : CommandOpMode() {
         val voltageSensor = VoltageSensor(hardwareMap)
         val lift = Lift(hardwareMap, voltageSensor)
         val claw = DualClaw(hardwareMap)
+        val launcher = Launcher(hardwareMap)
         val passthrough = Passthrough(hardwareMap)
         //val vision = Vision(hardwareMap)
         //val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision, Pose2d(), arrayToRowMatrix(doubleArrayOf()))
@@ -47,7 +49,7 @@ class MainTeleOp2  : CommandOpMode() {
             hub.bulkCachingMode = LynxModule.BulkCachingMode.AUTO
         }
 
-        register(voltageSensor, mecanum, claw, passthrough)
+        register(voltageSensor, mecanum, claw, passthrough, launcher)
 
         /****************************************************
          * Driver 1 Controls                                *
@@ -72,13 +74,7 @@ class MainTeleOp2  : CommandOpMode() {
         driver1
             .getGamepadButton(GamepadKeys.Button.A)
             .whenPressed(
-                SequentialCommandGroup(
-                    InstantCommand(claw::incramentOpen, claw),
-                    WaitCommand(100),
-                    InstantCommand(claw::incramentClosed, claw),
-                    WaitCommand(100),
-                    InstantCommand(claw::incramentOpen, claw)
-                )
+                InstantCommand(claw::incramentOpen, claw),
             )
 
         driver1
@@ -123,12 +119,7 @@ class MainTeleOp2  : CommandOpMode() {
                     WaitCommand(500),
                     InstantCommand(lift::retract, lift),
                     WaitUntilCommand(lift::atTarget),
-                    InstantCommand(claw::open, claw),
-                    WaitCommand(100),
-                    InstantCommand(claw::open, claw),
-                    WaitCommand(100),
-                    InstantCommand(claw::open, claw),
-                    WaitCommand(100)
+                    InstantCommand(claw::open, claw)
                 )
             )
 
@@ -175,6 +166,15 @@ class MainTeleOp2  : CommandOpMode() {
 
         Trigger { driver1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.5 }//TriggerReader(driver1, GamepadKeys.Trigger.RIGHT_TRIGGER)::wasJustPressed)
             .whenActive(InstantCommand(claw::releaseSecond, claw))
+
+
+
+        driver1
+            .getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+            .whenPressed(
+                InstantCommand(launcher::launch, launcher)
+            )
+
 
 
 

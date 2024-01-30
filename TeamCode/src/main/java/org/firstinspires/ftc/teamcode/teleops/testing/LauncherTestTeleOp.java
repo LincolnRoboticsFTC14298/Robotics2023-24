@@ -1,25 +1,28 @@
 package org.firstinspires.ftc.teamcode.teleops.testing;
-import static org.opencv.core.Core.findFileOrKeep;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
-public class ClawTestTeleOp extends LinearOpMode{
-    double MAX_POS = 1.0;
-    double MIN_POS = 0.35; //0.071
+public class LauncherTestTeleOp extends LinearOpMode{
     double position;
     Servo servo;
     @Override
     public void runOpMode() {
 
-        servo = hardwareMap.get(Servo.class, "claw");
+        servo = hardwareMap.get(Servo.class, "launcher");
+        position = 0.9;
 
         waitForStart();
 
         while(opModeIsActive()) {
-            position = (((-gamepad1.left_stick_y + 1) * (MAX_POS - MIN_POS)) / 2) + MIN_POS;
+            if (gamepad1.a) {
+                position = 0.4;
+            }
+            if (gamepad1.b) {
+                position = 0.9;
+            }
             servo.setPosition(position);
             telemetry.addData("Position", position);
             telemetry.update();
