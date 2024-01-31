@@ -82,7 +82,7 @@ class MainAuto : LinearOpMode() {
         voteCount[Vision.SpikeDirection.RIGHT] = 0
 
         // Store each spike position read
-        val maxReads = 15
+        val maxReads = 7
         while (voteCount.values.sum() < maxReads) { //TODO make this a safe loop
             val spikeDirectionUpdate = vision.getSpikeMarkDirectionUpdate() ?: continue
             voteCount[spikeDirectionUpdate] = voteCount[spikeDirectionUpdate]!! + 1
