@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.teleops.auto
 
+import android.util.Log
 import java.lang.Math.toRadians
 
 import com.acmerobotics.roadrunner.Pose2d
@@ -14,12 +15,14 @@ import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorag
 
 @Autonomous
 class MainAuto : LinearOpMode() {
+    private var spikePosition: Vision.SpikeDirection = Vision.SpikeDirection.CENTER
+
     override fun runOpMode() {
         val drive = MecanumDriveRR( //TODO check with normal drive subsystem
             hardwareMap,
             StartingPoseStorage.startingPose.pose
         )
-        val vision = Vision(hardwareMap, telemetry = telemetry)
+        val vision = Vision(hardwareMap)
 
 
         // Trajectories
@@ -71,9 +74,6 @@ class MainAuto : LinearOpMode() {
 
         if (isStopRequested) return
 
-        //Start streaming camera
-        vision.startStreamingFrontCamera()
-
         // Initialize variable to store spike position reads
         val voteCount = mutableMapOf<Vision.SpikeDirection, Int>()
 
@@ -83,16 +83,18 @@ class MainAuto : LinearOpMode() {
 
         // Store each spike position read
         val maxReads = 15
-        while (voteCount.size < maxReads) {
+        while (voteCount.values.sum() < maxReads) { //TODO make this a safe loop
             val spikeDirectionUpdate = vision.getSpikeMarkDirectionUpdate() ?: continue
             voteCount[spikeDirectionUpdate] = voteCount[spikeDirectionUpdate]!! + 1
+            Log.i("Votes", voteCount.toString())
+            telemetry.addData("Votes", voteCount.toString())
+            telemetry.update()
         }
 
         // Set spikePosition to the highest voted position
-        val spikePosition = voteCount.entries.maxByOrNull {it.value}?.key ?: Vision.SpikeDirection.CENTER
+        spikePosition = voteCount.entries.maxByOrNull {it.value}?.key ?: Vision.SpikeDirection.CENTER
 
-        // Stop streaming
-        vision.stopStreamingFrontCamera()
+
 
 
         // Trajectory Decision Tree

@@ -43,7 +43,7 @@ public class VisionSubsystemTestingOpMode extends OpMode {
         // enables us to only run logic when there has been a new frame, as opposed to the
         // getLatestDetections() method which will always return an object
 
-        AprilTagPose position = visionSubsystem.getLeftAprilTag(false);
+        AprilTagPose position = visionSubsystem.getLeftAprilTag();
 
 
         // If there's been a new frame...
