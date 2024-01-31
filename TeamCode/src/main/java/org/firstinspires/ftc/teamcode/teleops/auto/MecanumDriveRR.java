@@ -49,7 +49,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Config
-public final class MecanumDrive {
+public final class MecanumDriveRR {
     public static class Params {
         // drive model parameters
         public double inPerTick = 73.0 / 137145.0; //TODO maybe change to 0.00053228335?
@@ -113,10 +113,10 @@ public final class MecanumDrive {
         private Rotation2d lastHeading;
 
         public DriveLocalizer() {
-            leftFront = new OverflowEncoder(new RawEncoder(MecanumDrive.this.leftFront));
-            leftBack = new OverflowEncoder(new RawEncoder(MecanumDrive.this.leftBack));
-            rightBack = new OverflowEncoder(new RawEncoder(MecanumDrive.this.rightBack));
-            rightFront = new OverflowEncoder(new RawEncoder(MecanumDrive.this.rightFront));
+            leftFront = new OverflowEncoder(new RawEncoder(MecanumDriveRR.this.leftFront));
+            leftBack = new OverflowEncoder(new RawEncoder(MecanumDriveRR.this.leftBack));
+            rightBack = new OverflowEncoder(new RawEncoder(MecanumDriveRR.this.rightBack));
+            rightFront = new OverflowEncoder(new RawEncoder(MecanumDriveRR.this.rightFront));
 
             lastLeftFrontPos = leftFront.getPositionAndVelocity().position;
             lastLeftBackPos = leftBack.getPositionAndVelocity().position;
@@ -169,7 +169,7 @@ public final class MecanumDrive {
         }
     }
 
-    public MecanumDrive(HardwareMap hardwareMap, Pose2d pose) {
+    public MecanumDriveRR(HardwareMap hardwareMap, Pose2d pose) {
         this.pose = pose;
 
         LynxFirmware.throwIfModulesAreOutdated(hardwareMap);

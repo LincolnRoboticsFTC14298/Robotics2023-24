@@ -5,12 +5,17 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor;
+import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer;
 
 @TeleOp
-public class LocalizationTest extends LinearOpMode {
+public class LocalizationTest2 extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, new Pose2d(0, 0, 0));
+        OdometryLocalizer localizer = new OdometryLocalizer(hardwareMap);
+        VoltageSensor voltageSensor = new VoltageSensor(hardwareMap);
+        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0), localizer, voltageSensor, telemetry);
 
         waitForStart();
 
@@ -23,11 +28,11 @@ public class LocalizationTest extends LinearOpMode {
                     -gamepad1.right_stick_x
             ));
 
-            drive.updatePoseEstimate();
+            drive.periodic();
 
-            telemetry.addData("x", drive.pose.position.x);
-            telemetry.addData("y", drive.pose.position.y);
-            telemetry.addData("heading", drive.pose.heading);
+            telemetry.addData("x", drive.getPose().position.x);
+            telemetry.addData("y", drive.getPose().position.y);
+            telemetry.addData("heading", drive.getPose().heading);
             telemetry.update();
         }
 

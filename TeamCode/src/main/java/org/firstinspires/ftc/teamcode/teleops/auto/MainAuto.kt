@@ -15,7 +15,10 @@ import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorag
 @Autonomous
 class MainAuto : LinearOpMode() {
     override fun runOpMode() {
-        val drive = MecanumDrive(hardwareMap, StartingPoseStorage.startingPose.pose)
+        val drive = MecanumDriveRR( //TODO check with normal drive subsystem
+            hardwareMap,
+            StartingPoseStorage.startingPose.pose
+        )
         val vision = Vision(hardwareMap, telemetry = telemetry)
 
 
