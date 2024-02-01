@@ -42,9 +42,9 @@ TODO write a pipline for detecting a cone of a specific color, write a tuning op
 @Config
 class Vision(
     hwMap: HardwareMap,
-    startingPipeline: FrontPipeline = FrontPipeline.SPIKE_PIPELINE,
+    var startingPipeline: FrontPipeline = FrontPipeline.RED_SPIKE_PIPELINE,
     private val telemetry: Telemetry? = null
-        ) : SubsystemBase() {
+) : SubsystemBase() {
 
     val cameraMonitorViewId = hwMap.appContext.resources.getIdentifier(
         "cameraMonitorViewId",
@@ -80,7 +80,8 @@ class Vision(
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
         APRIL_TAG(AprilTagDetectionPipeline(CameraData.LOGITECH_C920)),
-        SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, {StartingPoseStorage.startingPose.isRedAlliance()}, telemetry))
+        RED_SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, true, telemetry)),
+        BLUE_SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, false, telemetry))
     }
 
     //val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.PHONECAM, telemetry)
@@ -88,7 +89,15 @@ class Vision(
     init {
         name = "Vision Subsystem"
 
-        (FrontPipeline.SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).telemetry = telemetry
+        if (startingPipeline == FrontPipeline.RED_SPIKE_PIPELINE || startingPipeline == FrontPipeline.BLUE_SPIKE_PIPELINE) { //also hacky but whatever
+            startingPipeline = if (StartingPoseStorage.startingPose.isRedAlliance()) {
+                FrontPipeline.RED_SPIKE_PIPELINE
+            } else {
+                FrontPipeline.BLUE_SPIKE_PIPELINE
+            }
+        }
+
+        (startingPipeline.pipeline as SpikeDetectionPipeline).telemetry = telemetry
 
         // Open cameras asynghronously and load the pipelines
         /*
@@ -235,7 +244,7 @@ class Vision(
     fun getSpikeMarkDetections(): List<Vector2d> {
 
 
-        val spikes = (FrontPipeline.SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).spikeResults
+        val spikes = if (StartingPoseStorage.startingPose.isRedAlliance()) (FrontPipeline.RED_SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).spikeResults else (FrontPipeline.BLUE_SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).spikeResults
 
         val landmarks = mutableListOf<Vector2d>()
 

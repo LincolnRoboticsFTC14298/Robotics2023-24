@@ -17,7 +17,7 @@ import org.opencv.imgproc.Imgproc.drawContours
 open class SpikeDetectionPipeline(
     private var displayMode: DisplayMode = DisplayMode.ALL_CONTOURS,
     camera: Vision.Companion.CameraData,
-    isRedAlliance: () -> Boolean,
+    isRedAlliance: Boolean,
     var telemetry: Telemetry?
 ) : ModularPipeline() {
 
@@ -37,7 +37,7 @@ open class SpikeDetectionPipeline(
     private val inputModule = InputModule()
     //private val undistort = UndistortLens(inputModule, camMat, distCoeffs)
     private val labColorSpace = ColorConverter(inputModule, Imgproc.COLOR_RGB2Lab)
-    private val spikeMask: Filter = if(isRedAlliance.invoke()){Filter(labColorSpace, Scalar(0.0, 154.0, 110.0), Scalar(255.0, 210.0, 190.0))} else {Filter(labColorSpace, Scalar(75.0, 106.0, 102.0), Scalar(133.0, 145.0, 124.0))}
+    private val spikeMask: Filter = if(isRedAlliance){Filter(labColorSpace, Scalar(0.0, 154.0, 110.0), Scalar(255.0, 210.0, 190.0))} else {Filter(labColorSpace, Scalar(75.0, 106.0, 102.0), Scalar(133.0, 145.0, 124.0))}
     private val denoisedSpikeMask = Denoise(spikeMask, 5, 5, 3, 3)
     private val rawSpikeContours = Contours(denoisedSpikeMask)
 
