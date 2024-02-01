@@ -21,6 +21,7 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
+import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorage
 
 @TeleOp
 class MainTeleOp  : CommandOpMode() {
@@ -37,7 +38,7 @@ class MainTeleOp  : CommandOpMode() {
         //val vision = Vision(hardwareMap)
         //val localizer = MecanumMonteCarloLocalizer(hardwareMap, vision, Pose2d(), arrayToRowMatrix(doubleArrayOf()))
         val localizer = OdometryLocalizer(hardwareMap)
-        val mecanum = MecanumDrive(hardwareMap, Pose2d(0.0, 0.0, Math.toRadians(0.0)), localizer, voltageSensor)
+        val mecanum = MecanumDrive(hardwareMap, StartingPoseStorage.startingPose.pose, localizer, voltageSensor)
 
         //register(lift, claw, passthrough, mecanum, vision)
 

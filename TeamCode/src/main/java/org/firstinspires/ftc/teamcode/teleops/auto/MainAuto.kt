@@ -196,7 +196,7 @@ class MainAuto : LinearOpMode() {
         spikePosition = voteCount.entries.maxByOrNull {it.value}?.key ?: Vision.SpikeDirection.CENTER
 
 
-
+/*
 
         // Trajectory Decision Tree
         when (StartingPoseStorage.startingPose) {
@@ -239,6 +239,6 @@ class MainAuto : LinearOpMode() {
             StartingPose.RED_LEFT -> {
                 runBlocking(redLeft)
             }
-        }
+        } */
     }
 }
