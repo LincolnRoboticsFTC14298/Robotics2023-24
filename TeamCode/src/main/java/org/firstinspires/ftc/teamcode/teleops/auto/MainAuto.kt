@@ -18,48 +18,149 @@ class MainAuto : LinearOpMode() {
         val drive = MecanumDrive(hardwareMap, StartingPoseStorage.startingPose.pose)
         val vision = Vision(hardwareMap, telemetry = telemetry)
 
-
         // Trajectories
-        val blueRight = drive.actionBuilder(drive.pose)
-            .setTangent(toRadians(-90.0))
-            .splineToConstantHeading(Vector2d(-57.0, -42.0), toRadians(0.0))
-            .splineToLinearHeading(Pose2d(-45.0, -36.0, toRadians(0.0)), toRadians(180.0))
-            .splineToLinearHeading(Pose2d(-60.0, -48.0, toRadians(-90.0)), toRadians(-90.0))
-            .splineToLinearHeading(Pose2d(-60.0, 12.0, toRadians(-90.0)), toRadians(90.0))
-            .splineToLinearHeading(Pose2d(-36.0, 36.0, toRadians(-90.0)), toRadians(90.0))
-            .splineToConstantHeading(Vector2d(-60.0, 48.0), toRadians(90.0))
-            .splineToConstantHeading(Vector2d(-60.0, 60.0), toRadians(90.0))
-            .build()
 
-        val blueLeft = drive.actionBuilder(drive.pose)
+        //Blue Right
+        val blueRightPartOne = drive.actionBuilder(drive.pose)
+                    .setTangent(toRadians(-90.0))
+                    .splineToConstantHeading(Vector2d(-57.0, -42.0), toRadians(0.0))
+                    .splineToLinearHeading(Pose2d(-45.0, -36.0, toRadians(0.0)), toRadians(180.0))
+                    .build()
+
+            val blueRightPixelLeft = drive.actionBuilder(Pose2d(-45.0, -36.0, toRadians(0.0)))
+                    .setTangent(toRadians(180.0))
+                    .splineToLinearHeading(Pose2d(-30.0, -39.5, toRadians(90.0)), toRadians(0.0))
+                    .build()
+
+            val blueRightPixelCenter = drive.actionBuilder(Pose2d(-45.0, -36.0, toRadians(0.0)))
+                    .setTangent(toRadians(180.0))
+                    .splineToLinearHeading(Pose2d(-39.5, -36.0, toRadians(0.0)), toRadians(0.0))
+                    .build()
+
+            val blueRightPixelRight = drive.actionBuilder(Pose2d(-45.0, -36.0, toRadians(0.0)))
+                    .setTangent(toRadians(180.0))
+                    .splineToLinearHeading(Pose2d(-30.0, -36.0, toRadians(-90.0)), toRadians(0.0))
+                    .splineToConstantHeading(Vector2d(-30.0, -32.50), toRadians(0.0))
+                    .build()
+
+        val blueRightPartTwo = drive.actionBuilder(drive.pose)
+                    .setTangent(toRadians(180.0))
+                    .splineToLinearHeading(Pose2d(-48.0, -48.0, toRadians(90.0)), toRadians(180.0))
+                    .splineToConstantHeading(Vector2d(-60.0, -48.0), toRadians(90.0))
+                    .splineToConstantHeading(Vector2d(-60.0, 12.0), toRadians(90.0))
+                    .splineToLinearHeading(Pose2d(-36.0, 36.0, toRadians(-90.0)), toRadians(90.0))
+                    .build()
+
+        val blueRightPartThree = drive.actionBuilder(drive.pose)
+                    .setTangent(toRadians(90.0))
+                    .splineToConstantHeading(Vector2d(-60.0, 48.0), toRadians(90.0))
+                    .splineToConstantHeading(Vector2d(-60.0, 60.0), toRadians(90.0))
+                    .build()
+
+
+        //Blue Left
+        val blueLeftPartOne = drive.actionBuilder(drive.pose)
             .setTangent(toRadians(90.0))
             .splineToConstantHeading(Vector2d(-54.0, 24.0), toRadians(45.0))
             .splineToLinearHeading(Pose2d(-54.0, 18.0, toRadians(0.0)), toRadians(-90.0))
-            .splineToConstantHeading(Vector2d(-45.0, 12.0), toRadians(90.0))
+            .splineToConstantHeading(Vector2d(-45.0, 12.0), toRadians(0.0))
+            .build()
+
+            val blueLeftPixelLeft = drive.actionBuilder(drive.pose)
+                .setTangent(toRadians(0.0))
+                .splineToLinearHeading(Pose2d(-30.0, 15.5, toRadians(-90.0)), toRadians(0.0))
+                .build()
+
+            val blueLeftPixelCenter = drive.actionBuilder(drive.pose)
+                .setTangent(toRadians(0.0))
+                .splineToLinearHeading(Pose2d(-39.5, 12.0, toRadians(0.0)), toRadians(0.0))
+                .build()
+
+            val blueLeftPixelRight = drive.actionBuilder(drive.pose)
+                .setTangent(toRadians(0.0))
+                .splineToLinearHeading(Pose2d(-30.0, 12.0, toRadians(90.0)), toRadians(0.0))
+                .splineToConstantHeading(Vector2d(-30.0, 8.50), toRadians(90.0))
+                .build()
+
+        val blueLeftPartTwo = drive.actionBuilder(drive.pose)
             .splineToLinearHeading(Pose2d(-54.0, 36.0, toRadians(-90.0)), toRadians(90.0))
             .splineToConstantHeading(Vector2d(-36.0, 36.0), toRadians(90.0))
+            .build()
+
+        val blueLeftPartThree = drive.actionBuilder(drive.pose)
             .splineToConstantHeading(Vector2d(-60.0, 48.0), toRadians(90.0))
             .splineToConstantHeading(Vector2d(-60.0, 60.0), toRadians(90.0))
             .build()
 
-        val redLeft = drive.actionBuilder(drive.pose)
+
+        //Red Left
+        val redLeftPartOne = drive.actionBuilder(drive.pose)
             .setTangent(toRadians(-90.0))
             .splineToConstantHeading(Vector2d(57.0, -42.0), toRadians(180.0))
             .splineToLinearHeading(Pose2d(45.0, -36.0, toRadians(180.0)), toRadians(0.0))
-            .splineToLinearHeading(Pose2d(60.0, -48.0, toRadians(-90.0)), toRadians(-90.0))
-            .splineToLinearHeading(Pose2d(60.0, 12.0, toRadians(-90.0)), toRadians(90.0))
+            .build()
+
+            val redLeftPixelLeft = drive.actionBuilder(drive.pose)
+                .setTangent(toRadians(0.0))
+                .splineToLinearHeading(Pose2d(30.0, -39.5, toRadians(90.0)), toRadians(0.0))
+                .build()
+
+            val redLeftPixelCenter = drive.actionBuilder(drive.pose)
+                .setTangent(toRadians(0.0))
+                .splineToLinearHeading(Pose2d(39.5, -36.0, toRadians(180.0)), toRadians(0.0))
+                .build()
+
+            val redLeftPixelRight = drive.actionBuilder(drive.pose)
+                .setTangent(toRadians(0.0))
+                .splineToLinearHeading(Pose2d(30.0, -36.0, toRadians(-90.0)), toRadians(0.0))
+                .splineToConstantHeading(Vector2d(30.0, -32.50), toRadians(-90.0))
+                .build()
+
+        val redLeftPartTwo = drive.actionBuilder(drive.pose)
+            .setTangent(toRadians(180.0))
+            .splineToLinearHeading(Pose2d(48.0, -48.0, toRadians(-90.0)), toRadians(180.0))
+            .splineToConstantHeading(Vector2d(60.0, -48.0), toRadians(90.0))
+            .splineToConstantHeading(Vector2d(60.0, 12.0), toRadians(90.0))
             .splineToLinearHeading(Pose2d(36.0, 36.0, toRadians(-90.0)), toRadians(90.0))
+            .build()
+
+        val redLeftPartThree = drive.actionBuilder(drive.pose)
+            .setTangent(toRadians(90.0))
             .splineToConstantHeading(Vector2d(60.0, 48.0), toRadians(90.0))
             .splineToConstantHeading(Vector2d(60.0, 60.0), toRadians(90.0))
             .build()
 
-        val redRight = drive.actionBuilder(drive.pose)
+
+        //Red Right
+        val redRightPartOne = drive.actionBuilder(drive.pose)
             .setTangent(toRadians(90.0))
             .splineToConstantHeading(Vector2d(54.0, 24.0), toRadians(135.0))
             .splineToLinearHeading(Pose2d(54.0, 18.0, toRadians(180.0)), toRadians(-90.0))
             .splineToConstantHeading(Vector2d(45.0, 12.0), toRadians(90.0))
+            .build()
+
+            val redRightPixelLeft = drive.actionBuilder(drive.pose)
+                .setTangent(toRadians(0.0))
+                .splineToLinearHeading(Pose2d(30.0, 15.5, toRadians(-90.0)), toRadians(180.0))
+                .build()
+
+            val redRightPixelCenter = drive.actionBuilder(drive.pose)
+                .setTangent(toRadians(90.0))
+                .splineToLinearHeading(Pose2d(39.5, 12.0, toRadians(180.0)), toRadians(180.0))
+                .build()
+
+            val redRightPixelRight = drive.actionBuilder(drive.pose)
+                .setTangent(toRadians(180.0))
+                .splineToLinearHeading(Pose2d(30.0, 12.0, toRadians(90.0)), toRadians(180.0))
+                .splineToConstantHeading(Vector2d(30.0, 8.50), toRadians(0.0))
+                .build()
+
+        val redRightPartTwo = drive.actionBuilder(drive.pose)
             .splineToLinearHeading(Pose2d(54.0, 36.0, toRadians(-90.0)), toRadians(90.0))
             .splineToConstantHeading(Vector2d(36.0, 36.0), toRadians(90.0))
+            .build()
+
+        val redRightPartThree = drive.actionBuilder(drive.pose)
             .splineToConstantHeading(Vector2d(60.0, 48.0), toRadians(90.0))
             .splineToConstantHeading(Vector2d(60.0, 60.0), toRadians(90.0))
             .build()
@@ -95,11 +196,9 @@ class MainAuto : LinearOpMode() {
         // Trajectory Decision Tree
         when (StartingPoseStorage.startingPose) {
             StartingPose.BLUE_RIGHT -> {
-                runBlocking(blueRight) // Old all-in-one trajectory
 
 
-                /*
-                runBlocking(blueRight1) // Drives to pixel placement branch
+                runBlocking(blueRightPartOne) // Drives to pixel placement branch
 
                 when (spikePosition) { // Drives to 1 of 3 pixel placement spots depending on vision data
                     Vision.SpikeDirection.LEFT -> runBlocking(blueRightPixelLeft) //TODO make and add pixel placement command
@@ -107,12 +206,12 @@ class MainAuto : LinearOpMode() {
                     Vision.SpikeDirection.RIGHT -> runBlocking(blueRightPixelRight)
                 }
 
-                runBlocking(drive.actionBuilder(drive.pose) // Drives to next node
-                    .splineToLinearHeading()
-                    .build()
-                )
+//                runBlocking(drive.actionBuilder(drive.pose) // Drives to next node
+//                    .splineToLinearHeading()
+//                    .build()
+//                )
 
-                runBlocking(blueRight2) // Continues rest of path up to the backdrop
+                runBlocking(blueRightPartTwo) // Continues rest of path up to the backdrop
 
                 when (spikePosition) { // Drives to 1 of 3 backdrop placement spots depending on vision data
                     Vision.SpikeDirection.LEFT -> runBlocking(blueRightBackdropLeft) //TODO make and add pixel placement command, make vision auto align code
@@ -120,8 +219,8 @@ class MainAuto : LinearOpMode() {
                     Vision.SpikeDirection.RIGHT -> runBlocking(blueRightBackdropRight)
                 }
 
-                runBlocking(blueRight3) // Finish path
-                 */
+                runBlocking(blueRightPartThree) // Finish path
+
             }
 
             StartingPose.BLUE_LEFT -> {
