@@ -14,7 +14,7 @@ import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.commands.drive.SimpleJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.DualClaw
-import org.firstinspires.ftc.teamcode.subsystems.Lift
+import org.firstinspires.ftc.teamcode.subsystems.LiftKF
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
@@ -28,7 +28,7 @@ class OldMainTeleOp  : CommandOpMode() {
          ****************************************************/
 
         val voltageSensor = VoltageSensor(hardwareMap)
-        val lift = Lift(hardwareMap, voltageSensor)
+        val lift = LiftKF(hardwareMap, voltageSensor)
         val claw = DualClaw(hardwareMap)
         val passthrough = Passthrough(hardwareMap)
         //val vision = Vision(hardwareMap)
@@ -119,15 +119,15 @@ class OldMainTeleOp  : CommandOpMode() {
         //lift heights
         driver1
             .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-            .whenPressed(InstantCommand({ lift.setHeight(Lift.LiftPosition.LOW) }, lift))
+            .whenPressed(InstantCommand({ lift.setHeight(LiftKF.LiftPosition.LOW) }, lift))
 
         driver1
             .getGamepadButton(GamepadKeys.Button.DPAD_UP)
-            .whenPressed(InstantCommand({ lift.setHeight(Lift.LiftPosition.MIDDLE) }, lift))
+            .whenPressed(InstantCommand({ lift.setHeight(LiftKF.LiftPosition.MIDDLE) }, lift))
 
         driver1
             .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-            .whenPressed(InstantCommand({ lift.setHeight(Lift.LiftPosition.HIGH) }, lift))
+            .whenPressed(InstantCommand({ lift.setHeight(LiftKF.LiftPosition.HIGH) }, lift))
 
         //release
         Trigger{ driver1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) >= 0.5 }

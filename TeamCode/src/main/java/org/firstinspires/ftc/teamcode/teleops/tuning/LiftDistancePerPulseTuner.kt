@@ -5,19 +5,19 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.subsystems.Lift
+import org.firstinspires.ftc.teamcode.subsystems.LiftKF
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 
 @TeleOp
 class LiftDistancePerPulseTuner() : OpMode() {
 
-    private lateinit var lift: Lift
+    private lateinit var lift: LiftKF
     lateinit var voltageSensor: VoltageSensor
 
     override fun init() {
         voltageSensor = VoltageSensor(hardwareMap)
 
-        lift = Lift(hardwareMap, voltageSensor)
+        lift = LiftKF(hardwareMap, voltageSensor)
         telemetry = MultipleTelemetry(telemetry, FtcDashboard.getInstance().telemetry)
     }
 

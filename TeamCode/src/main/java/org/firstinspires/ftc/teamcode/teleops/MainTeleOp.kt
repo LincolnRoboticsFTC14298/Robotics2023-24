@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.teleops
 
-import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.PoseVelocity2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.CommandOpMode
@@ -16,7 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.commands.drive.SimpleJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.DualClaw
 import org.firstinspires.ftc.teamcode.subsystems.Launcher
-import org.firstinspires.ftc.teamcode.subsystems.Lift
+import org.firstinspires.ftc.teamcode.subsystems.LiftKF
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
@@ -31,7 +30,7 @@ class MainTeleOp  : CommandOpMode() {
          ****************************************************/
 
         val voltageSensor = VoltageSensor(hardwareMap)
-        val lift = Lift(hardwareMap, voltageSensor)
+        val lift = LiftKF(hardwareMap, voltageSensor)
         val claw = DualClaw(hardwareMap)
         val launcher = Launcher(hardwareMap)
         val passthrough = Passthrough(hardwareMap)
@@ -48,7 +47,7 @@ class MainTeleOp  : CommandOpMode() {
             hub.bulkCachingMode = LynxModule.BulkCachingMode.AUTO
         }
 
-        register(voltageSensor, mecanum, claw, passthrough, launcher)
+        register(voltageSensor, mecanum, lift, claw, passthrough, launcher)
 
         /****************************************************
          * Driver 1 Controls                                *
@@ -131,7 +130,7 @@ class MainTeleOp  : CommandOpMode() {
                     WaitCommand(200),
                     InstantCommand(passthrough::deposit, passthrough),
                     WaitCommand(300),
-                    InstantCommand({ lift.setHeight(Lift.LiftPosition.LOW) }, lift)
+                    InstantCommand({ lift.setHeight(LiftKF.LiftPosition.LOW) }, lift)
                 )
             )
 
@@ -143,7 +142,7 @@ class MainTeleOp  : CommandOpMode() {
                     WaitCommand(200),
                     InstantCommand(passthrough::deposit, passthrough),
                     WaitCommand(300),
-                    InstantCommand({ lift.setHeight(Lift.LiftPosition.MIDDLE) }, lift)
+                    InstantCommand({ lift.setHeight(LiftKF.LiftPosition.MIDDLE) }, lift)
                 )
             )
 
@@ -155,7 +154,7 @@ class MainTeleOp  : CommandOpMode() {
                     WaitCommand(200),
                     InstantCommand(passthrough::deposit, passthrough),
                     WaitCommand(300),
-                    InstantCommand({ lift.setHeight(Lift.LiftPosition.HIGH) }, lift)
+                    InstantCommand({ lift.setHeight(LiftKF.LiftPosition.HIGH) }, lift)
                 )
             )
 

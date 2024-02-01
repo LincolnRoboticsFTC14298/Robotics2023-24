@@ -3,10 +3,10 @@ package org.firstinspires.ftc.teamcode.teleops.tuning
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket
-import com.qualcomm.robotcore.eventloop.opmode.Disabled
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.subsystems.Lift
+import org.firstinspires.ftc.teamcode.subsystems.LiftKF
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 
 @TeleOp
@@ -23,15 +23,13 @@ class ManualLiftFeedforwardTuner : OpMode() {
 
     var up = false
     override fun loop() {
-        if (lift.timeFromTarget() < 0 ) {
-            if(!up) {
-                lift.setpoint = 23.0
-                up = true
-            }
-            else {
-                lift.setpoint = 5.0
-                up = false
-            }
+        if(!up && gamepad1.a) {
+            lift.setpoint = 23.0
+            up = true
+        }
+        else if (gamepad1.a){
+            lift.setpoint = 5.0
+            up = false
         }
 
         voltageSensor.periodic()
