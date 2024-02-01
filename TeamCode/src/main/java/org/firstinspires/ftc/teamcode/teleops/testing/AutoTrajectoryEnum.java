@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.teleops.auto.MecanumDrive;
+import org.firstinspires.ftc.teamcode.teleops.auto.MecanumDriveRR;
 
 
 /**
@@ -36,7 +36,7 @@ public class AutoTrajectoryEnum extends LinearOpMode {
         }
     }
 
-    MecanumDrive drive = new MecanumDrive(hardwareMap, StartingPose.BLUE_RIGHT.getPose());
+    MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, StartingPose.BLUE_RIGHT.getPose());
 
     @Override
     public void runOpMode() throws InterruptedException {

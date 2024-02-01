@@ -32,6 +32,7 @@ class PseudoMotionProfiledDrive(
     }
 
     override fun execute() {
+        mecanum.periodic()
         val currentVel = mecanum.robotVelRobot.linearVel.norm()
 
         var desiredInput = input.invoke()

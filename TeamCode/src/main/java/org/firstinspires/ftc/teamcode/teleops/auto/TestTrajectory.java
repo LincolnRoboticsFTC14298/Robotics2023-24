@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 public class TestTrajectory extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
+        MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, new Pose2d(0, 0, 0));
 
 
         Action test = drive.actionBuilder(new Pose2d(0, 0, 0))

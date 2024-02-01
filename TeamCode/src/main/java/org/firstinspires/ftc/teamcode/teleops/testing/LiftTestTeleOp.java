@@ -20,8 +20,8 @@ public class LiftTestTeleOp extends LinearOpMode
 
         while (opModeIsActive())
         {
-            motorLeft.setPower(-gamepad1.left_stick_y/7.0);
-            motorRight.setPower(-gamepad1.left_stick_y/7.0);
+            motorLeft.setPower(-gamepad1.left_stick_y/3.0);
+            motorRight.setPower(-gamepad1.left_stick_y/3.0);
 
         }
     }

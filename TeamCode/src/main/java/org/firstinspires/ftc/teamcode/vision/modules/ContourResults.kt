@@ -31,7 +31,7 @@ class ContourResults(
     private val pitchDistanceOffset: Double = targetWidth/2.0 // Used incase the center of the object is wanted instead
 ) : AbstractPipelineModule<List<ContourResults.AnalysisResult>>() {
 
-    data class AnalysisResult(val angle: Double, val distanceByPitch: Double?, val distanceByWidth: Double) {
+    data class AnalysisResult(val angle: Double, val distanceByPitch: Double?, val distanceByWidth: Double, val pitch: Double, val yaw:Double) {
 
         fun toVector(useDistanceByWidth: Boolean = false) : Vector2d {
             val distance = chooseDistance(useDistanceByWidth)
@@ -64,15 +64,15 @@ class ContourResults(
 
             val points = contour.toList()
             val bottom = points.maxBy { it.y }
-//            val boundingBox = boundingRect(contour)
-//            val pixelX = boundingBox.x+(boundingBox.width/2.0)
+            val boundingBox = boundingRect(contour)
+            val pixelX = boundingBox.x+(boundingBox.width/2.0)
 //            val pixelY = (boundingBox.y+boundingBox.height).toDouble()
 //            val pixelPoint = Point(pixelX, pixelY) // find pixel location of bottom middle of contour bounding box
 
             // adjust to aiming coordinate space to x: [left -1, right 1] y: [top 1, bottom -1]
             val w = rawInput.size().width
             val h = rawInput.size().height
-            val Ax = (bottom.x - w/2.0) / (w/2.0)
+            val Ax = (pixelX - w/2.0) / (w/2.0)
             val Ay = (h/2.0 - bottom.y) / (h/2.0)
 
             // calculate angle and distance
@@ -90,9 +90,9 @@ class ContourResults(
 
             // add to results
             if (pitch epsilonEquals -camera.FOVY / 2.0) { // not safe to use width for non rectangular outlines
-                AnalysisResult(yaw, distanceByPitch, distanceByWidth)
+                AnalysisResult(yaw, distanceByPitch, distanceByWidth, pitch, yaw)
             } else {
-                AnalysisResult(yaw, distanceByPitch, distanceByWidth)
+                AnalysisResult(yaw, distanceByPitch, distanceByWidth, pitch, yaw)
             }
         }
     }
