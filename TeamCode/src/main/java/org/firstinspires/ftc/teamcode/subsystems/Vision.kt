@@ -29,15 +29,10 @@ import org.openftc.easyopencv.OpenCvPipeline
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
+import org.firstinspires.ftc.teamcode.FieldConfig.AprilTagResult
 
 /*
-TODO Research veiwportContainerIds
-TODO Create different pipelines for apriltag, *pixels, spike mark
-TODO add april tag data to fieldConfig/cameraConfig
 TODO search vision subsystem for additions and changes to make
-TODO add method for returning Pose2D from aprilTagID
-TODO not urgent: python/java script train convexity and aspect ratio values (mean and variance) might already exist in test pipeline
-TODO write a pipline for detecting a cone of a specific color, write a tuning opmode for that pipline with editable filter parameters via the dashboard like in the Mecanum and Vision subsystems for ease of tuning
  */
 
 
@@ -63,25 +58,6 @@ class Vision(
 
     private val dashboard = FtcDashboard.getInstance()
 
-    enum class AprilTagResult(var id: Int, var tagSize: Double) {
-        BACKDROP_LEFT_BLUE(1, 2.0),
-        BACKDROP_MIDDLE_BLUE(2, 2.0),
-        BACKDROP_RIGHT_BLUE(3, 2.0),
-
-        BACKDROP_LEFT_RED(4, 2.0),
-        BACKDROP_MIDDLE_RED(5, 2.0),
-        BACKDROP_RIGHT_RED(6, 2.0),
-
-        AUDIENCE_WALL_BIG_BLUE(10, 5.0),
-        AUDIENCE_WALL_SMALL_BLUE(9, 2.0),
-
-        AUDIENCE_WALL_BIG_RED(7, 5.0),
-        AUDIENCE_WALL_SMALL_RED(8, 2.0);
-
-        companion object {
-            fun find(id: Int): AprilTagResult? = AprilTagResult.values().find { it.id == id }
-        }
-    }
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
         APRIL_TAG(AprilTagDetectionPipeline(CameraData.LOGITECH_C920)),
@@ -95,22 +71,6 @@ class Vision(
 
         (FrontPipeline.SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).telemetry = telemetry
 
-        // Open cameras asynghronously and load the pipelines
-        /*
-        phoneCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
-            override fun onOpened() {
-                phoneCam.setPipeline(phoneCamPipeline)
-                phoneCam.showFpsMeterOnViewport(true)
-                phoneCam.setViewportRenderer(OpenCvCamera.ViewportRenderer.GPU_ACCELERATED)
-            }
-
-            override fun onError(errorCode: Int) {
-                /*
-                 * This will be called if the camera could not be opened
-                 */
-            }
-        })
-        */
 
 
         webCam.openCameraDeviceAsync(object : AsyncCameraOpenListener {
@@ -161,6 +121,9 @@ class Vision(
     private val DECIMATION_LOW = 2f
     private val THRESHOLD_HIGH_DECIMATION_RANGE_FEET = 3.0f
     private val THRESHOLD_NUM_FRAMES_NO_DETECTION_BEFORE_LOW_DECIMATION = 4
+
+
+
     fun updateAprilTag() : ArrayList<AprilTagDetection>? {
         // Calling getDetectionsUpdate() will only return an object if there was a new frame
         // processed since the last time we called it. Otherwise, it will return null. This
@@ -198,21 +161,31 @@ class Vision(
     }
 
     fun getLeftAprilTag(redTeam: Boolean) : AprilTagPose? {
-        val tags = updateAprilTag()
-        if (tags != null) {
-            for (tag in tags) {
-                if (tag.id == (if (redTeam) {
-                            AprilTagResult.BACKDROP_LEFT_RED.id
-                        } else {
-                            AprilTagResult.BACKDROP_LEFT_BLUE.id
-                        })) {
-                    return tag.pose
-                }
-            }
-        }
-        return null
+        return (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).poseFromId(if (redTeam) {
+            AprilTagResult.BACKDROP_LEFT_RED.id
+        } else {
+            AprilTagResult.BACKDROP_LEFT_BLUE.id
+        })
     }
 
+    fun getRightAprilTag(redTeam: Boolean) : AprilTagPose? {
+        return (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).poseFromId(if (redTeam) {
+            AprilTagResult.BACKDROP_RIGHT_RED.id
+        } else {
+            AprilTagResult.BACKDROP_RIGHT_BLUE.id
+        })
+    }
+
+    fun getCenterAprilTag(redTeam: Boolean) : AprilTagPose? {
+        return (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).poseFromId(if (redTeam) {
+            AprilTagResult.BACKDROP_MIDDLE_RED.id
+        } else {
+            AprilTagResult.BACKDROP_MIDDLE_BLUE.id
+        })
+    }
+
+    
+    
     data class ObservationResult(val angle: Double, val distance: Double) {
 
         companion object {
