@@ -73,12 +73,6 @@ class MainAuto : LinearOpMode() {
             .build()
 
 
-        val blueRightPartThree = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0)))
-            .setTangent(toRadians(90.0))
-            .splineToConstantHeading(Vector2d(-60.0, 48.0), toRadians(90.0))
-            .splineToConstantHeading(Vector2d(-60.0, 60.0), toRadians(90.0))
-            .build()
-
 
         //Blue Left
         val blueLeftPartOne = drive.actionBuilder(drive.pose)
@@ -125,10 +119,20 @@ class MainAuto : LinearOpMode() {
                 .build()
 
 
-        val blueLeftPartThree = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0)))
-            .splineToConstantHeading(Vector2d(-60.0, 48.0), toRadians(90.0))
-            .splineToConstantHeading(Vector2d(-60.0, 60.0), toRadians(90.0))
-            .build()
+        //Blue Part Three Left
+        val bluePartThreeLeft = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0)))
+                .setTangent(toRadians(90.0))  //Idk if you need this
+                .splineToConstantHeading(Vector2d(-60.0, 48.0), toRadians(90.0))
+                .splineToConstantHeading(Vector2d(-60.0, 60.0), toRadians(90.0))
+                .build()
+
+
+        //Blue Part Three Right
+        val bluePartThreeRight = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0)))
+                .setTangent(toRadians(90.0))  //Idk if you need this
+                .splineToConstantHeading(Vector2d(-12.0, 48.0), toRadians(90.0))
+                .splineToConstantHeading(Vector2d(-12.0, 60.0), toRadians(90.0))
+                .build()
 
 
         //Red Left
@@ -138,18 +142,18 @@ class MainAuto : LinearOpMode() {
             .splineToLinearHeading(Pose2d(45.0, -36.0, toRadians(180.0)), toRadians(0.0))
             .build()
 
-            val redLeftPixelLeft = drive.actionBuilder(drive.pose)
-                .setTangent(toRadians(0.0))
+            val redLeftPixelLeft = drive.actionBuilder(Pose2d(45.0, -36.0, toRadians(180.0)))
+                .setTangent(toRadians(-90.0))
                 .splineToLinearHeading(Pose2d(30.0, -39.5, toRadians(90.0)), toRadians(0.0))
                 .build()
 
-            val redLeftPixelCenter = drive.actionBuilder(drive.pose)
+            val redLeftPixelCenter = drive.actionBuilder(Pose2d(45.0, -36.0, toRadians(180.0)))
                 .setTangent(toRadians(0.0))
                 .splineToLinearHeading(Pose2d(39.5, -36.0, toRadians(180.0)), toRadians(0.0))
                 .build()
 
-            val redLeftPixelRight = drive.actionBuilder(drive.pose)
-                .setTangent(toRadians(0.0))
+            val redLeftPixelRight = drive.actionBuilder(Pose2d(45.0, -36.0, toRadians(180.0)))
+                .setTangent(toRadians(90.0))
                 .splineToLinearHeading(Pose2d(30.0, -36.0, toRadians(-90.0)), toRadians(0.0))
                 .splineToConstantHeading(Vector2d(30.0, -32.50), toRadians(-90.0))
                 .build()
@@ -161,6 +165,20 @@ class MainAuto : LinearOpMode() {
             .splineToConstantHeading(Vector2d(60.0, 12.0), toRadians(90.0))
             .splineToLinearHeading(Pose2d(36.0, 36.0, toRadians(-90.0)), toRadians(90.0))
             .build()
+
+        val redLeftBackdropLeft = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
+                .setTangent(toRadians(180.0))
+                .splineToConstantHeading(Vector2d(40.0, 40.0), toRadians(0.0))
+                .build()
+
+        val redLeftBackdropCenter = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
+                .setTangent(toRadians(90.0))
+                .splineToConstantHeading(Vector2d(36.0, 40.0), toRadians(0.0))
+                .build()
+
+        val redLeftBackdropRight = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
+                .setTangent(toRadians(0.0))
+                .splineToConstantHeading(Vector2d(32.0, 40.0), toRadians(0.0))
 
         val redLeftPartThree = drive.actionBuilder(drive.pose)
             .setTangent(toRadians(90.0))
@@ -261,7 +279,7 @@ class MainAuto : LinearOpMode() {
                     .build()
                 )
 
-                runBlocking(blueRightPartThree) // Finish path
+                runBlocking(bluePartThreeLeft) // Finish path
 
             }
 
@@ -296,7 +314,7 @@ class MainAuto : LinearOpMode() {
                     .build()
                 )
 
-                runBlocking(blueLeftPartThree) // Finish path
+                runBlocking(bluePartThreeLeft) // Finish path
 
             }
 
