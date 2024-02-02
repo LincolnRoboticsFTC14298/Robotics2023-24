@@ -27,7 +27,7 @@ import kotlin.math.sin
  * @param hwMap        HardwareMap.
  */
 @Config
-class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : SubsystemBase() {
+class LiftKF(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : SubsystemBase() {
 
     /**
      * Avoid using the individual motors, it's best to use the group.
@@ -72,13 +72,14 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
             Log.i("Lift setpoint attempt", length.toString())
             field = Range.clip(length, 0.0, liftMaxExtension)
             displacement = field - getRawExtensionLength() //TODO also change to setpoint here
-            if (displacement != 0.0) { //TODO change getExtensionLength() to setpoint to get displacement between previous and current values?
+            if (displacement != 0.0) { //TODO change getExtensionLength() to setpoint to get displacement between previous and current values
                 profileTimer.reset()
                 motionProfile = TimeProfile(constantProfile(abs(displacement), 0.0, liftMaxVel, -liftMaxAccel, liftMaxAccel).baseProfile)
             }
         }
 
     init {
+
         val processModel = ConstantAccelerationProcessModel()
 
         val H = SimpleMatrix(arrayOf(doubleArrayOf(1.0, 0.0, 0.0), doubleArrayOf(0.0, 1.0, 0.0)))
@@ -96,27 +97,15 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         motorGroup.setDistancePerPulse(liftDPP)
         motorGroup.setZeroPowerBehavior(Motor.ZeroPowerBehavior.FLOAT)
 
-        setpoint = 0.5
-
-        Log.i("Lift init setpoint", setpoint.toString())
-        Log.i("Lift init displacement", displacement.toString())
-        Log.i ("Lift init displacementDesiredState", motionProfile[profileTimer.seconds()].values().toDoubleArray().contentToString())
+        retract()
     }
 
     var desiredState: DoubleArray = DoubleArray(3)
-    override fun periodic() { //TODO fix shakey bug IDFK WHY IT HAPPENS
-
-
-
+    override fun periodic() {
         // TODO: Maybe only set power if it has actually changed!! Do this through thresholding
         //  integrating current power with desired power. Write wrappers for automatic voltage
         //  compensation.
         //  Naive optimization would only write when motion profiling is active; heavily trusts ff
-
-        updateController()
-
-        Log.v("setpoint", setpoint.toString())
-        Log.v("displacement", displacement.toString())
 
         desiredState = getGlobalDesiredState()
 
@@ -132,7 +121,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         val u = desiredState.zip(state).map { it.first - it.second }.toDoubleArray()
         updateFilter(arrayToColumnMatrix(u))
 
-        setPower(controller.update(getRawExtensionLength(), getRawVelocity()))
+        setPower(controller.update(getExtensionLength(), getVelocity()))
 
         timer.reset()
 
@@ -237,7 +226,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
      * Retracts the lift to the starting height.
      */
     fun retract() {
-        setpoint = 0.0
+        setpoint = 0.01
         checkLimit = true
     }
 
@@ -364,17 +353,17 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         var liftMaxAccel = 40.0 // in / s2
 
         @JvmField
-        var liftKStatic = 0.05
+        var liftKStatic = 0.1397
         @JvmField
-        var liftKV = 0.053
+        var liftKV = 0.057
         @JvmField
         var liftKA = 0.0035
         @JvmField
-        var gravityFeedforward = 0.045
+        var gravityFeedforward = 0.0435
 
 
         @JvmField
-        var liftCoeffs = PIDCoefficients(0.2, 0.0, 0.007) // TODO: Calculate from kV and kA
+        var liftCoeffs = PIDCoefficients(0.2, 0.0, 0.0) // TODO: Calculate from kV and kA
 
         val liftTargetErrorTolerance = 0.7 // in
 

@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.subsystems
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.canvas.Canvas
 import com.acmerobotics.dashboard.config.Config
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.acmerobotics.roadrunner.Pose2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.SubsystemBase
@@ -11,28 +10,30 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName
-import org.firstinspires.ftc.teamcode.FieldConfig
+import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorage
 import org.firstinspires.ftc.teamcode.vision.AprilTagDetectionPipeline
-import org.firstinspires.ftc.teamcode.vision.GeneralPipeline
 import org.firstinspires.ftc.teamcode.vision.SpikeDetectionPipeline
 import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.MatOfDouble
 import org.openftc.apriltag.AprilTagDetection
 import org.openftc.apriltag.AprilTagPose
-import org.openftc.easyopencv.OpenCvCamera
 import org.openftc.easyopencv.OpenCvCamera.AsyncCameraOpenListener
 import org.openftc.easyopencv.OpenCvCameraFactory
 import org.openftc.easyopencv.OpenCvCameraRotation
-import org.openftc.easyopencv.OpenCvInternalCamera
 import org.openftc.easyopencv.OpenCvPipeline
-import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 import org.firstinspires.ftc.teamcode.FieldConfig.AprilTagResult
 
 /*
+TODO Research veiwportContainerIds
+TODO Create different pipelines for apriltag, *pixels, spike mark
+TODO add april tag data to fieldConfig/cameraConfig
 TODO search vision subsystem for additions and changes to make
+TODO add method for returning Pose2D from aprilTagID
+TODO not urgent: python/java script train convexity and aspect ratio values (mean and variance) might already exist in test pipeline
+TODO write a pipline for detecting a cone of a specific color, write a tuning opmode for that pipline with editable filter parameters via the dashboard like in the Mecanum and Vision subsystems for ease of tuning
  */
 
 
@@ -41,9 +42,9 @@ TODO search vision subsystem for additions and changes to make
  */
 @Config
 class Vision(
-        hwMap: HardwareMap,
-        startingPipeline: FrontPipeline = FrontPipeline.SPIKE_PIPELINE,
-        private val telemetry: Telemetry? = null
+    hwMap: HardwareMap,
+    var startingPipeline: FrontPipeline = FrontPipeline.RED_SPIKE_PIPELINE,
+    private val telemetry: Telemetry? = null
 ) : SubsystemBase() {
 
     val cameraMonitorViewId = hwMap.appContext.resources.getIdentifier(
@@ -61,7 +62,8 @@ class Vision(
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
         APRIL_TAG(AprilTagDetectionPipeline(CameraData.LOGITECH_C920)),
-        SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, true, telemetry)) //TODO add logic to get the current alliance color
+        RED_SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, true, telemetry)),
+        BLUE_SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, false, telemetry))
     }
 
     //val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.PHONECAM, telemetry)
@@ -69,7 +71,15 @@ class Vision(
     init {
         name = "Vision Subsystem"
 
-        (FrontPipeline.SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).telemetry = telemetry
+        if (startingPipeline == FrontPipeline.RED_SPIKE_PIPELINE || startingPipeline == FrontPipeline.BLUE_SPIKE_PIPELINE) { //also hacky but whatever
+            startingPipeline = if (StartingPoseStorage.startingPose.isRedAlliance()) {
+                FrontPipeline.RED_SPIKE_PIPELINE
+            } else {
+                FrontPipeline.BLUE_SPIKE_PIPELINE
+            }
+        }
+
+        (startingPipeline.pipeline as SpikeDetectionPipeline).telemetry = telemetry
 
 
 
@@ -104,8 +114,8 @@ class Vision(
     fun stopStreamingFrontCamera() {
         webCam.stopStreaming()
         dashboard.stopCameraStream()
+        lastSpikeFrame = 0
     }
-
 
     /**
      * Sets the front pipeline.
@@ -160,32 +170,22 @@ class Vision(
         return null
     }
 
-    fun getLeftAprilTag(redTeam: Boolean) : AprilTagPose? {
-        return (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).poseFromId(if (redTeam) {
-            AprilTagResult.BACKDROP_LEFT_RED.id
-        } else {
-            AprilTagResult.BACKDROP_LEFT_BLUE.id
-        })
+    fun getLeftAprilTag() : AprilTagPose? {
+        val tags = updateAprilTag()
+        if (tags != null) {
+            for (tag in tags) {
+                if (tag.id == (if (StartingPoseStorage.startingPose.isRedAlliance()) {
+                            AprilTagResult.BACKDROP_LEFT_RED.id
+                        } else {
+                            AprilTagResult.BACKDROP_LEFT_BLUE.id
+                        })) {
+                    return tag.pose
+                }
+            }
+        }
+        return null
     }
 
-    fun getRightAprilTag(redTeam: Boolean) : AprilTagPose? {
-        return (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).poseFromId(if (redTeam) {
-            AprilTagResult.BACKDROP_RIGHT_RED.id
-        } else {
-            AprilTagResult.BACKDROP_RIGHT_BLUE.id
-        })
-    }
-
-    fun getCenterAprilTag(redTeam: Boolean) : AprilTagPose? {
-        return (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).poseFromId(if (redTeam) {
-            AprilTagResult.BACKDROP_MIDDLE_RED.id
-        } else {
-            AprilTagResult.BACKDROP_MIDDLE_BLUE.id
-        })
-    }
-
-    
-    
     data class ObservationResult(val angle: Double, val distance: Double) {
 
         companion object {
@@ -210,15 +210,15 @@ class Vision(
      * TODO: Include tall stacks not next to poles
      */
 
-    fun getSpikeMarkDetections(): List<ObservationResult> {
+    fun getSpikeMarkDetections(): List<Vector2d> {
 
 
-        val spikes = (FrontPipeline.SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).spikeResults
+        val spikes = if (StartingPoseStorage.startingPose.isRedAlliance()) (FrontPipeline.RED_SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).spikeResults else (FrontPipeline.BLUE_SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).spikeResults
 
-        val landmarks = mutableListOf<ObservationResult>()
+        val landmarks = mutableListOf<Vector2d>()
 
         spikes.forEach { spike ->
-            landmarks.add(ObservationResult(spike.angle, spike.distanceByPitch ?: spike.distanceByWidth))
+            landmarks.add(Vector2d(spike.yaw, spike.pitch)) //hacky but ehh itll work for comp - change back later tho
         }
 
         return landmarks
@@ -226,10 +226,10 @@ class Vision(
 
 
 
-    fun getSpikeInfo(): List<ObservationResult> = getSpikeMarkDetections().map{ it + CameraData.LOGITECH_C920.relativePosition }
+    fun getSpikeInfo(): List<Vector2d> = getSpikeMarkDetections().map{ it - Vector2d(0.0, CameraData.LOGITECH_C920.pitch) }
 
-    val leftSpikeCutoff = -350.0; //TODO verify these values
-    val rightSpikeCutoff = 4.0;
+    val leftSpikeCutoff = -0.2 //TODO verify these values
+    val rightSpikeCutoff = 0.2
 
     enum class SpikeDirection() {
         LEFT(),
@@ -237,17 +237,27 @@ class Vision(
         RIGHT()
     }
 
-    fun getSpikeMarkDirection(): SpikeDirection {
-        val spike =  getSpikeInfo().minByOrNull { it.distance }
-        val xCoord = spike!!.toVector().x
+    var lastSpikeFrame = 0
+    var spikeLocation = 0.0
+    fun getSpikeMarkDirectionUpdate(): SpikeDirection? {
+        if (lastSpikeFrame != webCam.frameCount) {
+            lastSpikeFrame = webCam.frameCount
+            val closestSpike = getSpikeInfo().minByOrNull { it.y }
+            if (closestSpike != null) {
+                val xCoord = closestSpike.x
+                spikeLocation = xCoord
 
-        if (xCoord > rightSpikeCutoff) {
-            return SpikeDirection.RIGHT
-        } else if (xCoord > leftSpikeCutoff) {
-            return SpikeDirection.CENTER
-        } else {
-            return SpikeDirection.LEFT
+                return if (xCoord > rightSpikeCutoff) {
+                    SpikeDirection.RIGHT
+                } else if (xCoord > leftSpikeCutoff) {
+                    SpikeDirection.CENTER
+                } else {
+                    SpikeDirection.LEFT
+                }
+            }
         }
+
+        return null
     }
 
     private fun drawObservationResult(canvas: Canvas, observation: ObservationResult, pose: Pose2d, radius: Double, fill: Boolean = true) {
@@ -262,7 +272,7 @@ class Vision(
                 Math.toRadians(60.0),
                 Math.toRadians(60.0), 0.0, 0.0, 0.0, 0.0, MatOfDouble(0.0, 0.0, 0.0, 0.0, 0.0)
             ),
-            LOGITECH_C920(Math.toRadians(5.05), 5.44, Vector2d(4.5, 0.0),
+            LOGITECH_C920(0.01, 5.44, Vector2d(4.5, 0.0),
                 Math.toRadians(70.42),
                 Math.toRadians(43.3), 477.73045982, 479.24207234, 311.48519892, 176.10784813, MatOfDouble(0.07622862, -0.41153656, -0.00089351, 0.00219123, 0.57699695)
             );

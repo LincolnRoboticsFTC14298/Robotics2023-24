@@ -4,16 +4,47 @@ import android.util.Log
 import com.acmerobotics.dashboard.canvas.Canvas
 import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket
-import com.acmerobotics.roadrunner.*
+import com.acmerobotics.roadrunner.AccelConstraint
+import com.acmerobotics.roadrunner.Action
+import com.acmerobotics.roadrunner.AngularVelConstraint
+import com.acmerobotics.roadrunner.DualNum
+import com.acmerobotics.roadrunner.HolonomicController
+import com.acmerobotics.roadrunner.MecanumKinematics
+import com.acmerobotics.roadrunner.MinVelConstraint
+import com.acmerobotics.roadrunner.MotorFeedforward
+import com.acmerobotics.roadrunner.Pose2d
+import com.acmerobotics.roadrunner.PoseVelocity2d
+import com.acmerobotics.roadrunner.PoseVelocity2dDual
+import com.acmerobotics.roadrunner.ProfileAccelConstraint
+import com.acmerobotics.roadrunner.Rotation2d
+import com.acmerobotics.roadrunner.Time
+import com.acmerobotics.roadrunner.TimeTrajectory
+import com.acmerobotics.roadrunner.TimeTurn
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder
+import com.acmerobotics.roadrunner.TurnConstraints
+import com.acmerobotics.roadrunner.Twist2dDual
+import com.acmerobotics.roadrunner.Vector2d
+import com.acmerobotics.roadrunner.VelConstraint
+import com.acmerobotics.roadrunner.now
+import com.acmerobotics.roadrunner.range
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
-import com.qualcomm.robotcore.hardware.*
+import com.qualcomm.robotcore.hardware.DcMotor
+import com.qualcomm.robotcore.hardware.DcMotorEx
+import com.qualcomm.robotcore.hardware.DcMotorSimple
+import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.Telemetry
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
-import org.firstinspires.ftc.teamcode.FieldConfig
-import org.firstinspires.ftc.teamcode.util.*
-import java.util.*
+import org.firstinspires.ftc.teamcode.util.Encoder
+import org.firstinspires.ftc.teamcode.util.Localizer
+import org.firstinspires.ftc.teamcode.util.LogFiles
+import org.firstinspires.ftc.teamcode.util.LynxFirmwareVersion
+import org.firstinspires.ftc.teamcode.util.OverflowEncoder
+import org.firstinspires.ftc.teamcode.util.RawEncoder
+import java.util.Arrays
+import java.util.LinkedList
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.sqrt
@@ -23,7 +54,7 @@ import kotlin.math.sqrt
 class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Localizer, val voltageSensor: VoltageSensor, var telemetry: Telemetry? = null) : SubsystemBase() {
     private val kinematics = MecanumKinematics(
         IN_PER_TICK * TRACK_WIDTH_TICKS,
-        LATERAL_MULTIPLIER //IN_PER_TICK / LATERAL_IN_PER_TICK
+        IN_PER_TICK / LATERAL_IN_PER_TICK //LATERAL_MULTIPLIER
     )
     private val feedforward = MotorFeedforward(kS, kV / IN_PER_TICK, kA / IN_PER_TICK)
     private val defaultTurnConstraints = TurnConstraints(
@@ -155,7 +186,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         val parameters = IMU.Parameters(
             RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD
             )
         )
 
@@ -182,15 +213,26 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
         val wheelVels: MecanumKinematics.WheelVelocities<Time> =
             kinematics.inverse(PoseVelocity2dDual.constant(vels, 1))
 
-        Log.i("input", vels.toString())
-        telemetry?.addData("leftFront", DualNum.constant<Time>(wheelVels.leftFront[0], 2)[1])
-        telemetry?.update()
+        Log.i("setDriveSignal_input", vels.toString())
 
         val voltage = voltageSensor.voltage
         leftFront.power = feedforward.compute(DualNum.constant(wheelVels.leftFront[0], 2)) / voltage
         leftBack.power = feedforward.compute(DualNum.constant(wheelVels.leftBack[0], 2)) / voltage
         rightBack.power = feedforward.compute(DualNum.constant(wheelVels.rightBack[0], 2)) / voltage
         rightFront.power = feedforward.compute(DualNum.constant(wheelVels.rightFront[0], 2)) / voltage
+    }
+
+    fun setDriveSignal(vels: PoseVelocity2dDual<Time>) {
+        val wheelVels: MecanumKinematics.WheelVelocities<Time> =
+            kinematics.inverse(vels)
+
+        Log.i("setDriveSignal_input", vels.toString())
+
+        val voltage = voltageSensor.voltage
+        leftFront.power = feedforward.compute(wheelVels.leftFront) / voltage
+        leftBack.power = feedforward.compute(wheelVels.leftBack) / voltage
+        rightBack.power = feedforward.compute(wheelVels.rightBack) / voltage
+        rightFront.power = feedforward.compute(wheelVels.rightFront) / voltage
     }
 
     fun setDrivePowers(powers: PoseVelocity2d) {
@@ -310,7 +352,7 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             val txWorldTarget = timeTrajectory[t]
             val command = HolonomicController(
                 AXIAL_GAIN, LATERAL_GAIN, HEADING_GAIN,
-                smartDamp(AXIAL_GAIN), smartDamp(LATERAL_GAIN), smartDamp(HEADING_GAIN)
+                AXIAL_VEL_GAIN, LATERAL_VEL_GAIN, HEADING_VEL_GAIN
             )
                 .compute(txWorldTarget, pose, robotVelRobot)
 
@@ -425,12 +467,12 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
             { t: TimeTrajectory -> FollowTrajectoryAction(t) },
             beginPose,
             1e-6,
-            0.0, //TODO New parameter, find correct value
+            0.0,
             defaultTurnConstraints,
             defaultVelConstraint,
             defaultAccelConstraint,
             0.25,
-            0.25 //TODO New parameter, find correct value
+            0.1
         )
     }
 
@@ -471,49 +513,49 @@ class MecanumDrive(hardwareMap: HardwareMap, var pose: Pose2d, val localizer: Lo
 
         // drive model parameters
         @JvmField
-        var IN_PER_TICK = 90.0 / 171923.0 //72.0 / 135426.0
+        var IN_PER_TICK = 73.0 / 137145.0 //90.0 / 171923.0 //72.0 / 135426.0 //TODO maybe change to 0.00053228335?
         @JvmField
-        var LATERAL_IN_PER_TICK = IN_PER_TICK
+        var LATERAL_IN_PER_TICK = 0.000318 //0.00042 //IN_PER_TICK
         @JvmField
         var LATERAL_MULTIPLIER = 1.0
         @JvmField
-        var TRACK_WIDTH_TICKS = 47133.00826222479
+        var TRACK_WIDTH_TICKS = 35000 //28310.0 //47133.00826222479
 
         // feedforward parameters
         @JvmField
-        var kS = 0.85 //1.3704012088907165
+        var kS = 0.5 //0.6 //1.22 //0.85 //1.3704012088907165 //TODO maybe change to 2.0
         @JvmField
-        var kV = 0.000111 //0.00009412030525896 //1.0 / rpmToVelocity(MAX_RPM)
+        var kV = 0.000089 //0.000092 //0.000103 //0.000111 //0.00009412030525896 //1.0 / rpmToVelocity(MAX_RPM)
         @JvmField
-        var kA = 0.0000180762925878
+        var kA = 0.000025 //0.000028 //0.000015 //0.0000180762925878
 
         // path profile parameters
         @JvmField
-        var MAX_WHEEL_VEL = (MAX_RPM / 60.0) * GEAR_RATIO * WHEEL_RADIUS * 2 * Math.PI * 0.85
+        var MAX_WHEEL_VEL = 50.0 //(MAX_RPM / 60.0) * GEAR_RATIO * WHEEL_RADIUS * 2 * Math.PI * 0.85 //TODO check to see how accurate the max of 50 is compared to the theoretical, test to see if it's too high
         @JvmField
         var MIN_PROFILE_ACCEL = -30.0
         @JvmField
-        var MAX_PROFILE_ACCEL = MAX_WHEEL_VEL
+        var MAX_PROFILE_ACCEL = 50.0 //MAX_WHEEL_VEL
 
         // turn profile parameters
         @JvmField
-        var MAX_ANG_VEL = MAX_WHEEL_VEL / TRACK_WIDTH // shared with path
+        var MAX_ANG_VEL = 1.5 //MAX_WHEEL_VEL / TRACK_WIDTH // shared with path
         @JvmField
         var MAX_ANG_ACCEL = MAX_ANG_VEL
 
         // path controller gains
         @JvmField
-        var AXIAL_GAIN = 0.0
+        var AXIAL_GAIN = 5.0
         @JvmField
-        var LATERAL_GAIN = 0.0
+        var LATERAL_GAIN = 5.0
         @JvmField
-        var HEADING_GAIN = 0.0 // shared with turn
+        var HEADING_GAIN = 4.0 // shared with turn
         @JvmField
-        var AXIAL_VEL_GAIN = 0.0
+        var AXIAL_VEL_GAIN = 1.0
         @JvmField
-        var LATERAL_VEL_GAIN = 0.0
+        var LATERAL_VEL_GAIN = 0.5
         @JvmField
-        var HEADING_VEL_GAIN = 0.0 // shared with turn
+        var HEADING_VEL_GAIN = 0.5 // shared with turn
 
         private fun rpmToVelocity(rpm: Double) =
             rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0

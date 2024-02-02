@@ -6,7 +6,8 @@ import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.*
 import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import org.firstinspires.ftc.teamcode.commands.drive.MotionProfiledJoystickDrive
+import org.firstinspires.ftc.teamcode.commands.drive.MotionProfiledJoystickDrive2
+import org.firstinspires.ftc.teamcode.commands.drive.SimpleJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 import org.firstinspires.ftc.teamcode.subsystems.*
 
@@ -21,7 +22,7 @@ class DrivebaseTestTeleOp : CommandOpMode() {
 
         val voltageSensor = VoltageSensor(hardwareMap)
         val localizer = OdometryLocalizer(hardwareMap)
-        val mecanum = MecanumDrive(hardwareMap, Pose2d(0.0, 0.0, Math.toRadians(90.0)), localizer, voltageSensor, telemetry)
+        val mecanum = MecanumDrive(hardwareMap, Pose2d(0.0, 0.0, Math.toRadians(0.0)), localizer, voltageSensor, telemetry)
 
         register(mecanum)
 
@@ -32,9 +33,9 @@ class DrivebaseTestTeleOp : CommandOpMode() {
          */
         val input = { PoseVelocity2d(Vector2d(driver1.leftY, -driver1.leftX), -driver1.rightX) }
 
-        var fieldCentric = false
+        var fieldCentric = true
 
-        mecanum.defaultCommand = MotionProfiledJoystickDrive(mecanum, input, { fieldCentric }, telemetry = telemetry)
+        mecanum.defaultCommand = SimpleJoystickDrive(mecanum, input, { fieldCentric })
     }
 
     override fun run() {

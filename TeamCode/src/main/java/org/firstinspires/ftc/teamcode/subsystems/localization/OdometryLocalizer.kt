@@ -126,9 +126,9 @@ class OdometryLocalizer(
     }
 
     companion object {
-        const val leftEncoderName = MecanumDrive.leftRearName // Must be port 0 and 3
-        const val rightEncoderName = MecanumDrive.leftFrontName // Must be port 0 and 3
-        const val perpendicularEncoderName = MecanumDrive.rightFrontName // port 1 or 2
+        const val leftEncoderName = MecanumDrive.rightRearName // PAR0 - Must be port 0 or 3 due to higher data transfer speeds on those ports
+        const val rightEncoderName = MecanumDrive.leftFrontName // PAR1 - Must be port 0 or 3
+        const val perpendicularEncoderName = MecanumDrive.rightFrontName // port 1 or 2 - perp transfer speeds are less important that parallel encoders
 
         @JvmField
         var X_MULTIPLIER = 1.0 // TODO multipliers for each individual encoder
@@ -140,11 +140,11 @@ class OdometryLocalizer(
         var FORWARD_OFFSET = 13.0 / 2.0 // in; offset of the lateral wheel
 
         @JvmField
-        var PAR0_Y_TICKS = -9664.594625447902
+        var PAR0_Y_TICKS = -13454.0 //-9664.594625447902
         @JvmField
-        var PAR1_Y_TICKS = 12265.310512671498
+        var PAR1_Y_TICKS = 14574.0 //12265.310512671498
         @JvmField
-        var PERP_X_TICKS = 12705.066008931835
+        var PERP_X_TICKS = -12323.0 //12705.066008931835
     }
 
 }

@@ -5,33 +5,30 @@ import com.acmerobotics.roadrunner.PoseVelocity2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.arcrobotics.ftclib.command.CommandOpMode
 import com.arcrobotics.ftclib.command.InstantCommand
-import com.arcrobotics.ftclib.command.ParallelCommandGroup
 import com.arcrobotics.ftclib.command.SequentialCommandGroup
 import com.arcrobotics.ftclib.command.WaitCommand
-import com.arcrobotics.ftclib.command.WaitUntilCommand
 import com.arcrobotics.ftclib.command.button.Trigger
 import com.arcrobotics.ftclib.gamepad.GamepadEx
 import com.arcrobotics.ftclib.gamepad.GamepadKeys
-import com.arcrobotics.ftclib.gamepad.TriggerReader
 import com.qualcomm.hardware.lynx.LynxModule
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.commands.drive.SimpleJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.DualClaw
-import org.firstinspires.ftc.teamcode.subsystems.Lift
+import org.firstinspires.ftc.teamcode.subsystems.LiftKF
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
 import org.firstinspires.ftc.teamcode.subsystems.localization.OdometryLocalizer
 
 @TeleOp
-class MainTeleOp2  : CommandOpMode() {
+class OldMainTeleOp  : CommandOpMode() {
     override fun initialize() {
         /****************************************************
          * Initialize hardware                              *
          ****************************************************/
 
         val voltageSensor = VoltageSensor(hardwareMap)
-        val lift = Lift(hardwareMap, voltageSensor)
+        val lift = LiftKF(hardwareMap, voltageSensor)
         val claw = DualClaw(hardwareMap)
         val passthrough = Passthrough(hardwareMap)
         //val vision = Vision(hardwareMap)
@@ -72,13 +69,7 @@ class MainTeleOp2  : CommandOpMode() {
         driver1
             .getGamepadButton(GamepadKeys.Button.A)
             .whenPressed(
-                SequentialCommandGroup(
-                    InstantCommand(claw::incramentOpen, claw),
-                    WaitCommand(100),
-                    InstantCommand(claw::incramentClosed, claw),
-                    WaitCommand(100),
-                    InstantCommand(claw::incramentOpen, claw)
-                )
+                InstantCommand(claw::incramentOpen, claw)
             )
 
         driver1
@@ -121,53 +112,22 @@ class MainTeleOp2  : CommandOpMode() {
                     WaitCommand(200),
                     InstantCommand(passthrough::halfway, passthrough),
                     WaitCommand(500),
-                    InstantCommand(lift::retract, lift),
-                    WaitUntilCommand(lift::atTarget),
-                    InstantCommand(claw::open, claw),
-                    WaitCommand(100),
-                    InstantCommand(claw::open, claw),
-                    WaitCommand(100),
-                    InstantCommand(claw::open, claw),
-                    WaitCommand(100)
+                    InstantCommand(lift::retract, lift)
                 )
             )
 
         //lift heights
         driver1
             .getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
-            .whenPressed(
-                SequentialCommandGroup(
-                    InstantCommand(claw::close, claw),
-                    WaitCommand(200),
-                    InstantCommand(passthrough::deposit, passthrough),
-                    WaitCommand(300),
-                    InstantCommand({ lift.setHeight(Lift.LiftPosition.LOW) }, lift)
-                )
-            )
+            .whenPressed(InstantCommand({ lift.setHeight(LiftKF.LiftPosition.LOW) }, lift))
 
         driver1
             .getGamepadButton(GamepadKeys.Button.DPAD_UP)
-            .whenPressed(
-                SequentialCommandGroup(
-                    InstantCommand(claw::close, claw),
-                    WaitCommand(200),
-                    InstantCommand(passthrough::deposit, passthrough),
-                    WaitCommand(300),
-                    InstantCommand({ lift.setHeight(Lift.LiftPosition.MIDDLE) }, lift)
-                )
-            )
+            .whenPressed(InstantCommand({ lift.setHeight(LiftKF.LiftPosition.MIDDLE) }, lift))
 
         driver1
             .getGamepadButton(GamepadKeys.Button.DPAD_RIGHT)
-            .whenPressed(
-                SequentialCommandGroup(
-                    InstantCommand(claw::close, claw),
-                    WaitCommand(200),
-                    InstantCommand(passthrough::deposit, passthrough),
-                    WaitCommand(300),
-                    InstantCommand({ lift.setHeight(Lift.LiftPosition.HIGH) }, lift)
-                )
-            )
+            .whenPressed(InstantCommand({ lift.setHeight(LiftKF.LiftPosition.HIGH) }, lift))
 
         //release
         Trigger{ driver1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) >= 0.5 }

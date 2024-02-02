@@ -39,7 +39,7 @@ class Launcher(hwMap: HardwareMap) : SubsystemBase() {
             field = clip(position, 0.0, 1.0)
             //timer.reset()
             //motionProfile = TimeProfile(constantProfile(position - getPositionEstimate(), 0.0, clawMaxVel, -clawMaxAccel, clawMaxAccel).baseProfile)
-            Log.i("Claw desired position", setpoint.toString())
+            Log.i("Launcher desired position", setpoint.toString())
         }
 
     init {
@@ -49,7 +49,7 @@ class Launcher(hwMap: HardwareMap) : SubsystemBase() {
     }
 
     override fun periodic() {
-        Log.v("Claw estimated angle", getPositionEstimate().toString())
+        Log.v("Launcher estimated angle", getPositionEstimate().toString())
         //servo.position = motionProfile[timer.seconds()].value()
         servo.position = setpoint
     }
@@ -90,9 +90,9 @@ class Launcher(hwMap: HardwareMap) : SubsystemBase() {
         const val launcherServoName = "launcher"
 
         @JvmField
-        var launcherStartingPosition = 0.05 //TODO Find
+        var launcherStartingPosition = 0.9
         @JvmField
-        var launchingPosition = 0.15 //TODO Find
+        var launchingPosition = 0.4
 
 
     }
