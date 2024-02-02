@@ -59,17 +59,17 @@ class MainAuto : LinearOpMode() {
 
         val blueRightBackdropLeft = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0))) 
             .setTangent(toRadians(180.0))
-            .splineToConstantHeading(Vector2d(-40.0, 40.0), toRadians(0.0))
+            .splineToConstantHeading(Vector2d(-40.0, 40.0), toRadians(90.0))
             .build()
 
         val blueRightBackdropCenter = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0)))
             .setTangent(toRadians(90.0))
-            .splineToConstantHeading(Vector2d(-36.0, 40.0), toRadians(0.0))
+            .splineToConstantHeading(Vector2d(-36.0, 40.0), toRadians(90.0))
             .build()
 
         val blueRightBackdropRight = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0))) 
             .setTangent(toRadians(0.0))
-            .splineToConstantHeading(Vector2d(-32.0, 40.0), toRadians(0.0))
+            .splineToConstantHeading(Vector2d(-32.0, 40.0), toRadians(90.0))
             .build()
 
 
@@ -105,23 +105,23 @@ class MainAuto : LinearOpMode() {
 
         val blueLeftPartTwo = drive.actionBuilder(Pose2d(-54.0, 36.0, toRadians(-90.0)))
             .setTangent(toRadians(90.0))
-            .splineToConstantHeading(Vector2d(-36.0, 36.0), toRadians(90.0))
+            .splineToConstantHeading(Vector2d(-36.0, 36.0), toRadians(0.0))
             .build()
 
 
         val blueLeftBackdropLeft = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0)))
                 .setTangent(toRadians(180.0))
-                .splineToConstantHeading(Vector2d(-40.0, 40.0), toRadians(0.0))
+                .splineToConstantHeading(Vector2d(-40.0, 40.0), toRadians(90.0))
                 .build()
 
         val blueLeftBackdropCenter = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0)))
                 .setTangent(toRadians(90.0))
-                .splineToConstantHeading(Vector2d(-36.0, 40.0), toRadians(0.0))
+                .splineToConstantHeading(Vector2d(-36.0, 40.0), toRadians(90.0))
                 .build()
 
         val blueLeftBackdropRight = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0)))
                 .setTangent(toRadians(0.0))
-                .splineToConstantHeading(Vector2d(-32.0, 40.0), toRadians(0.0))
+                .splineToConstantHeading(Vector2d(-32.0, 40.0), toRadians(90.0))
                 .build()
 
 
