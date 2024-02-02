@@ -182,13 +182,13 @@ class MainTeleOp  : CommandOpMode() {
 
 
         driver1
-            .getGamepadButton(GamepadKeys.Button.START)
+            .getGamepadButton(GamepadKeys.Button.BACK)
             .whenPressed(
                 InstantCommand(launcher::launch, launcher)
             )
 
         driver1
-            .getGamepadButton(GamepadKeys.Button.BACK)
+            .getGamepadButton(GamepadKeys.Button.START)
             .whenPressed(
                 InstantCommand({ fieldCentric = !fieldCentric })
             )
