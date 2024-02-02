@@ -171,19 +171,27 @@ class Vision(
     }
 
     fun getLeftAprilTag() : AprilTagPose? {
-        val tags = updateAprilTag()
-        if (tags != null) {
-            for (tag in tags) {
-                if (tag.id == (if (StartingPoseStorage.startingPose.isRedAlliance()) {
-                            AprilTagResult.BACKDROP_LEFT_RED.id
-                        } else {
-                            AprilTagResult.BACKDROP_LEFT_BLUE.id
-                        })) {
-                    return tag.pose
-                }
-            }
-        }
-        return null
+        return (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).poseFromId(if (StartingPoseStorage.startingPose.isRedAlliance()) {
+            AprilTagResult.BACKDROP_LEFT_RED.id
+        } else {
+            AprilTagResult.BACKDROP_LEFT_BLUE.id
+        })
+    }
+
+    fun getCenterAprilTag() : AprilTagPose? {
+        return (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).poseFromId(if (StartingPoseStorage.startingPose.isRedAlliance()) {
+            AprilTagResult.BACKDROP_MIDDLE_RED.id
+        } else {
+            AprilTagResult.BACKDROP_MIDDLE_BLUE.id
+        })
+    }
+
+    fun getRightAprilTag() : AprilTagPose? {
+        return (FrontPipeline.APRIL_TAG.pipeline as AprilTagDetectionPipeline).poseFromId(if (StartingPoseStorage.startingPose.isRedAlliance()) {
+            AprilTagResult.BACKDROP_RIGHT_RED.id
+        } else {
+            AprilTagResult.BACKDROP_RIGHT_BLUE.id
+        })
     }
 
     data class ObservationResult(val angle: Double, val distance: Double) {
