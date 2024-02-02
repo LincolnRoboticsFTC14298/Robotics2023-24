@@ -52,8 +52,8 @@ class MainAuto : LinearOpMode() {
 
         val blueRightPartTwo = drive.actionBuilder(Pose2d(-60.0, -48.0, toRadians(-90.0))) 
             .setTangent(toRadians(-90.0))
-            .splineToLinearHeading(Pose2d(-60.0, 12.0, toRadians(-90.0)), toRadians(90.0))
-            .splineToLinearHeading(Pose2d(-36.0, 36.0, toRadians(-90.0)), toRadians(90.0))
+            .splineToConstantHeading(Vector2d(-60.0, 36.0), toRadians(90.0))
+            .splineToConstantHeading(Vector2d(-36.0, 36.0), toRadians(0.0))
             .build()
 
 
