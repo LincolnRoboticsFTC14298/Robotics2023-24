@@ -168,15 +168,10 @@ class MainTeleOp  : CommandOpMode() {
 
 
         driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+            .getGamepadButton(GamepadKeys.Button.START)
             .whenPressed(
                 InstantCommand(launcher::launch, launcher)
             )
-
-
-
-
-
 
     }
 

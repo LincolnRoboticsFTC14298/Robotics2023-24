@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class ClawTestTeleOp extends LinearOpMode{
     double MAX_POS = 1.0;
-    double MIN_POS = 0.35; //0.071
+    double MIN_POS = 0.30; //0.071
     double position;
     Servo servo;
     @Override

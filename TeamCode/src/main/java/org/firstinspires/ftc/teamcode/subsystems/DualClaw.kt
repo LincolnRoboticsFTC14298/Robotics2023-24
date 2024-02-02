@@ -165,7 +165,7 @@ class DualClaw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition
         const val colorSensorName = "color"
 
         @JvmField
-        var clawClosedPosition = 0.35
+        var clawClosedPosition = 0.34
         @JvmField
         var clawPartiallyOpenedPosition = 0.45
         @JvmField

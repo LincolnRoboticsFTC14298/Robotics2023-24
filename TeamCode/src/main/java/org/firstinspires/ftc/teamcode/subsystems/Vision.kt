@@ -259,8 +259,8 @@ class Vision(
 
     fun getSpikeInfo(): List<Vector2d> = getSpikeMarkDetections().map{ it - Vector2d(0.0, CameraData.LOGITECH_C920.pitch) }
 
-    val leftSpikeCutoff = -0.2 //TODO verify these values
-    val rightSpikeCutoff = 0.2
+    val leftSpikeCutoff = -0.35 //TODO verify these values
+    val rightSpikeCutoff = 0.0
 
     enum class SpikeDirection() {
         LEFT(),

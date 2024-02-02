@@ -149,8 +149,8 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalf
         const val leftPassthroughName = "left"
         const val rightPassthroughName = "right"
 
-        const val passthroughMinPosition = 0.0 // empirically determined servo units
-        const val passthroughMaxPosition = 0.6 // empirically determined servo units
+        const val passthroughMinPosition = 0.07 // empirically determined servo units
+        const val passthroughMaxPosition = 0.71 // empirically determined servo units
 
         const val passthroughOffsetDistanceFromLift = 0.0
 
@@ -159,7 +159,7 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalf
         @JvmField
         var passthroughDepositPosition = passthroughMaxPosition
         @JvmField
-        var passthroughHalfwayPosition = 0.14
+        var passthroughHalfwayPosition = 0.15
         @JvmField
         var passthroughJunctionAngle = -15.0
 

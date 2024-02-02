@@ -250,15 +250,15 @@ class MainAuto : LinearOpMode() {
             }
 
             StartingPose.BLUE_LEFT -> {
-                runBlocking(blueLeft)
+                runBlocking(blueLeftPartOne)
             }
 
             StartingPose.RED_RIGHT -> {
-                runBlocking(redRight)
+                runBlocking(redRightPartOne)
             }
 
             StartingPose.RED_LEFT -> {
-                runBlocking(redLeft)
+                runBlocking(redLeftPartOne)
             }
         }
     }
