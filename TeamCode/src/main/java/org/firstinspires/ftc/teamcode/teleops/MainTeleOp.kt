@@ -77,7 +77,7 @@ class MainTeleOp  : CommandOpMode() {
         driver1
             .getGamepadButton(GamepadKeys.Button.B)
             .whenPressed(
-                InstantCommand({if(passthrough.passthroughState != Passthrough.PassthroughState.DEPOSIT) claw.incramentOpen()}, claw),
+                InstantCommand({if(passthrough.passthroughState != Passthrough.PassthroughState.DEPOSIT && !passthrough.isInTransit()) claw.incramentOpen()}, claw),
             )
 
         driver1
@@ -174,10 +174,10 @@ class MainTeleOp  : CommandOpMode() {
 
         //release
         Trigger{ driver1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) >= 0.5 }
-            .whenActive(InstantCommand(claw::releaseFirst, claw))
+            .whenActive(InstantCommand({ if (!lift.isRetracted && !passthrough.isInTransit()) claw.releaseFirst() }, claw))
 
         Trigger { driver1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.5 }//TriggerReader(driver1, GamepadKeys.Trigger.RIGHT_TRIGGER)::wasJustPressed)
-            .whenActive(InstantCommand(claw::releaseSecond, claw))
+            .whenActive(InstantCommand({ if (!lift.isRetracted && !passthrough.isInTransit()) claw.releaseSecond() }, claw))
 
 
 

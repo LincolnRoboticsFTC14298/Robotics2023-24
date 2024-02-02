@@ -146,13 +146,15 @@ class Passthrough(hwMap: HardwareMap, startingPosition: PassthroughState = Passt
      * @return If at desired angle based on time.
      */
     fun atTarget(): Boolean {
-        return timer.seconds() - motionProfile.duration > passthroughTimeTolerance
+        return (timer.seconds() - motionProfile.duration) > passthroughTimeTolerance
     }
 
     fun timeToTarget(position: Double) =
         TimeProfile(
             constantProfile(kotlin.math.abs(position - getPositionEstimate()), 0.0, passthroughMaxVel, -passthroughMaxAccel, passthroughMaxAccel).baseProfile
         ).duration
+
+    fun isInTransit(): Boolean = passthroughState != PassthroughState.PICKUP && !atTarget()
 
     /**
      * For debugging/tuning purposes
@@ -185,7 +187,7 @@ class Passthrough(hwMap: HardwareMap, startingPosition: PassthroughState = Passt
         var passthroughMaxAccel = 1.0
 
         @JvmField
-        var passthroughTimeTolerance = 0.2 // Seconds to wait after motion profile supposedly complete
+        var passthroughTimeTolerance = 0.01 // Seconds to wait after motion profile supposedly complete
     }
 
 }
