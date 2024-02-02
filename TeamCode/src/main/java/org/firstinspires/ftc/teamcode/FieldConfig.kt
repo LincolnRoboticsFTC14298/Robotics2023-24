@@ -18,20 +18,24 @@ object FieldConfig {
     /**
      * All of the apriltags on the field and their respective ids.
      */
-    enum class PoleType(val height: Int) {
-        BLUE_BACKDROP_LEFT(1),
-        BLUE_BACKDROP_CENTER(2),
-        BLUE_BACKDROP_RIGHT(3),
+    enum class AprilTagResult(var id: Int, var tagSize: Double) {
+        BACKDROP_LEFT_BLUE(1, 2.0),
+        BACKDROP_MIDDLE_BLUE(2, 2.0),
+        BACKDROP_RIGHT_BLUE(3, 2.0),
 
-        RED_BACKDROP_LEFT(4),
-        RED_BACKDROP_CENTER(5),
-        RED_BACKDROP_RIGHT(6),
+        BACKDROP_LEFT_RED(4, 2.0),
+        BACKDROP_MIDDLE_RED(5, 2.0),
+        BACKDROP_RIGHT_RED(6, 2.0),
 
-        BLUE_FRONT_SMALL(9),
-        BLUE_FRONT_LARGE(10),
+        AUDIENCE_WALL_BIG_BLUE(10, 5.0),
+        AUDIENCE_WALL_SMALL_BLUE(9, 2.0),
 
-        RED_FRONT_SMALL(8),
-        RED_FRONT_LARGE(7)
+        AUDIENCE_WALL_BIG_RED(7, 5.0),
+        AUDIENCE_WALL_SMALL_RED(8, 2.0);
+
+        companion object {
+            fun find(id: Int): AprilTagResult? = AprilTagResult.values().find { it.id == id }
+        }
     }
 
 

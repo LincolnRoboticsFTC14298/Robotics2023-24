@@ -36,6 +36,7 @@ import org.openftc.apriltag.AprilTagDetection
 import org.openftc.apriltag.AprilTagDetectorJNI
 import org.openftc.apriltag.AprilTagPose
 import org.openftc.easyopencv.OpenCvPipeline
+import org.firstinspires.ftc.teamcode.FieldConfig.AprilTagResult
 
 class AprilTagDetectionPipeline : OpenCvPipeline {
     private var nativeApriltagPtr: Long
@@ -56,16 +57,14 @@ class AprilTagDetectionPipeline : OpenCvPipeline {
 
     // UNITS ARE METERS
     var tagsize: Double
-    var tagsizeX: Double
-    var tagsizeY: Double
+    var tagsizeLarge: Double
     private var decimation = 0f
     private var needToSetDecimation = false
     private val decimationSync = Any()
 
     constructor(tagsize: Double, fx: Double, fy: Double, cx: Double, cy: Double) {
         this.tagsize = tagsize
-        tagsizeX = tagsize
-        tagsizeY = tagsize
+        this.tagsizeLarge = 5.0
         this.fx = fx
         this.fy = fy
         this.cx = cx
@@ -78,8 +77,7 @@ class AprilTagDetectionPipeline : OpenCvPipeline {
 
     constructor(cameraData: CameraData) {
         tagsize = 2.0
-        tagsizeX = 2.0
-        tagsizeY = 2.0
+        tagsizeLarge = 5.0
         fx = cameraData.fx //1.43057579e+03;
         fy = cameraData.fy //1.43401563e+03;
         cx = cameraData.cx //9.33013966e+02;
@@ -118,9 +116,10 @@ class AprilTagDetectionPipeline : OpenCvPipeline {
         // For fun, use OpenCV to draw 6DOF markers on the image. We actually recompute the pose using
         // OpenCV because I haven't yet figured out how to re-use AprilTag's pose in OpenCV.
         for (detection in latestDetections) {
-            val pose = poseFromTrapezoid(detection.corners, cameraMatrix, tagsizeX, tagsizeY)
-            drawAxisMarker(input, tagsizeY / 2.0, 6, pose.rvec, pose.tvec, cameraMatrix)
-            draw3dCubeMarker(input, tagsizeX, tagsizeX, tagsizeY, 5, pose.rvec, pose.tvec, cameraMatrix)
+            var thisTagsize = AprilTagResult.find(detection.id)!!.tagSize
+            val pose = poseFromTrapezoid(detection.corners, cameraMatrix, thisTagsize, thisTagsize)
+            drawAxisMarker(input, thisTagsize / 2.0, 6, pose.rvec, pose.tvec, cameraMatrix)
+            draw3dCubeMarker(input, thisTagsize, thisTagsize, thisTagsize, 5, pose.rvec, pose.tvec, cameraMatrix)
         }
         return input
     }
