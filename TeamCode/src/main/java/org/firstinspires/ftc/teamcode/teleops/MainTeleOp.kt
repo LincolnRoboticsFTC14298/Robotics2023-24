@@ -59,10 +59,15 @@ class MainTeleOp  : CommandOpMode() {
         /**
          * Drive
          */
-        val input = { PoseVelocity2d(Vector2d(driver1.leftY, -driver1.leftX), -driver1.rightX) }
+
+        val scaleFactorProvider = { if (lift.isRetracted) 1.0 else 0.3 }
+
+        val input = { PoseVelocity2d(Vector2d(driver1.leftY * scaleFactorProvider.invoke(), -driver1.leftX * scaleFactorProvider.invoke()), -driver1.rightX * 0.5 * (scaleFactorProvider.invoke() * 1.5)) }
 
         var fieldCentric = true
         val fieldCentricProvider = { fieldCentric }
+
+
 
         mecanum.defaultCommand = SimpleJoystickDrive(mecanum, input, fieldCentricProvider)
 
@@ -171,6 +176,12 @@ class MainTeleOp  : CommandOpMode() {
             .getGamepadButton(GamepadKeys.Button.START)
             .whenPressed(
                 InstantCommand(launcher::launch, launcher)
+            )
+
+        driver1
+            .getGamepadButton(GamepadKeys.Button.BACK)
+            .whenPressed(
+                InstantCommand({ fieldCentric = !fieldCentric })
             )
 
     }
