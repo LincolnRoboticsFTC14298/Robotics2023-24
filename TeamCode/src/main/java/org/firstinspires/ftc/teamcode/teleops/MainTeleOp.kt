@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp
 import org.firstinspires.ftc.teamcode.commands.drive.SimpleJoystickDrive
 import org.firstinspires.ftc.teamcode.subsystems.DualClaw
 import org.firstinspires.ftc.teamcode.subsystems.Launcher
-import org.firstinspires.ftc.teamcode.subsystems.LiftKF
+import org.firstinspires.ftc.teamcode.subsystems.Lift
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDrive
 import org.firstinspires.ftc.teamcode.subsystems.Passthrough
 import org.firstinspires.ftc.teamcode.subsystems.VoltageSensor
@@ -30,7 +30,7 @@ class MainTeleOp  : CommandOpMode() {
          ****************************************************/
 
         val voltageSensor = VoltageSensor(hardwareMap)
-        val lift = LiftKF(hardwareMap, voltageSensor)
+        val lift = Lift(hardwareMap, voltageSensor)
         val claw = DualClaw(hardwareMap)
         val launcher = Launcher(hardwareMap)
         val passthrough = Passthrough(hardwareMap)
@@ -130,7 +130,7 @@ class MainTeleOp  : CommandOpMode() {
                     WaitCommand(200),
                     InstantCommand(passthrough::deposit, passthrough),
                     WaitCommand(300),
-                    InstantCommand({ lift.setHeight(LiftKF.LiftPosition.LOW) }, lift)
+                    InstantCommand({ lift.setHeight(Lift.LiftPosition.LOW) }, lift)
                 )
             )
 
@@ -142,7 +142,7 @@ class MainTeleOp  : CommandOpMode() {
                     WaitCommand(200),
                     InstantCommand(passthrough::deposit, passthrough),
                     WaitCommand(300),
-                    InstantCommand({ lift.setHeight(LiftKF.LiftPosition.MIDDLE) }, lift)
+                    InstantCommand({ lift.setHeight(Lift.LiftPosition.MIDDLE) }, lift)
                 )
             )
 
@@ -154,7 +154,7 @@ class MainTeleOp  : CommandOpMode() {
                     WaitCommand(200),
                     InstantCommand(passthrough::deposit, passthrough),
                     WaitCommand(300),
-                    InstantCommand({ lift.setHeight(LiftKF.LiftPosition.HIGH) }, lift)
+                    InstantCommand({ lift.setHeight(Lift.LiftPosition.HIGH) }, lift)
                 )
             )
 
