@@ -77,13 +77,13 @@ class MainTeleOp  : CommandOpMode() {
         driver1
             .getGamepadButton(GamepadKeys.Button.B)
             .whenPressed(
-                InstantCommand(claw::incramentOpen, claw),
+                InstantCommand({if(passthrough.passthroughState != Passthrough.PassthroughState.DEPOSIT) claw.incramentOpen()}, claw),
             )
 
         driver1
             .getGamepadButton(GamepadKeys.Button.A)
             .whenPressed(
-                InstantCommand(claw::incramentClosed, claw)
+                InstantCommand({if(passthrough.passthroughState != Passthrough.PassthroughState.DEPOSIT) claw.incramentClosed()}, claw)
             )
 
 
@@ -91,12 +91,26 @@ class MainTeleOp  : CommandOpMode() {
         driver1
             .getGamepadButton(GamepadKeys.Button.Y)
             .whenPressed(
-                InstantCommand(passthrough::halfway, passthrough)
+                InstantCommand({
+                    if ((passthrough.passthroughState.ordinal + 1) < Passthrough.PassthroughState.values().size && lift.isRetracted) {
+                        if (passthrough.passthroughState == Passthrough.PassthroughState.HALFWAY) {
+                            claw.close()
+                        }
+                        passthrough.setState(Passthrough.PassthroughState.values()[passthrough.passthroughState.ordinal + 1])
+                    }
+                }, passthrough)
             )
         driver1
             .getGamepadButton(GamepadKeys.Button.X)
             .whenPressed(
-                InstantCommand(passthrough::pickUp, passthrough)
+                InstantCommand({
+                    if ((passthrough.passthroughState.ordinal - 1) >= 0 && lift.isRetracted) {
+                        if (passthrough.passthroughState == Passthrough.PassthroughState.DEPOSIT) {
+                            claw.close()
+                        }
+                        passthrough.setState(Passthrough.PassthroughState.values()[passthrough.passthroughState.ordinal - 1])
+                    }
+                }, passthrough)
             )
 
 
@@ -117,12 +131,7 @@ class MainTeleOp  : CommandOpMode() {
             .whenPressed(
                 SequentialCommandGroup(
                     InstantCommand(claw::close, claw),
-                    WaitCommand(200),
-                    InstantCommand(passthrough::halfway, passthrough),
-                    WaitCommand(500),
-                    InstantCommand(lift::retract, lift),
-                    WaitUntilCommand(lift::atTarget),
-                    InstantCommand(claw::open, claw)
+                    InstantCommand(lift::retract, lift)
                 )
             )
 
