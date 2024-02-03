@@ -25,6 +25,7 @@ import org.openftc.easyopencv.OpenCvPipeline
 import kotlin.math.cos
 import kotlin.math.sin
 import org.firstinspires.ftc.teamcode.FieldConfig.AprilTagResult
+import org.opencv.core.Point
 
 /*
 TODO Research veiwportContainerIds
@@ -62,8 +63,8 @@ class Vision(
 
     enum class FrontPipeline(var pipeline: OpenCvPipeline) {
         APRIL_TAG(AprilTagDetectionPipeline(CameraData.LOGITECH_C920)),
-        RED_SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, true, telemetry)),
-        BLUE_SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.ALL_CONTOURS, CameraData.LOGITECH_C920, false, telemetry))
+        RED_SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.MARKER, CameraData.LOGITECH_C920, true, telemetry)),
+        BLUE_SPIKE_PIPELINE(SpikeDetectionPipeline(SpikeDetectionPipeline.DisplayMode.MARKER, CameraData.LOGITECH_C920, false, telemetry))
     }
 
     //val phoneCamPipeline = GeneralPipeline(GeneralPipeline.DisplayMode.ALL_CONTOURS, CameraData.PHONECAM, telemetry)
@@ -104,7 +105,7 @@ class Vision(
      * Starts streaming the front camera.
      */
     fun startStreamingFrontCamera() {
-        webCam.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT ) // TODO Check
+        webCam.startStreaming(160, 90, OpenCvCameraRotation.UPRIGHT ) // TODO Check
         dashboard.startCameraStream(webCam, 10.0)
     }
 
@@ -218,23 +219,17 @@ class Vision(
      * TODO: Include tall stacks not next to poles
      */
 
-    fun getSpikeMarkDetections(): List<Vector2d> {
+    fun getSpikeMarkDetection(): Point { //hacky but ehh itll work for comp - change back later tho - (3 days or so later) hah you thought THAT was bad??? well boy do I have news for you.
 
+        val spikeResults =
+            if (StartingPoseStorage.startingPose.isRedAlliance()) (FrontPipeline.RED_SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).spikeResults else (FrontPipeline.BLUE_SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).spikeResults
 
-        val spikes = if (StartingPoseStorage.startingPose.isRedAlliance()) (FrontPipeline.RED_SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).spikeResults else (FrontPipeline.BLUE_SPIKE_PIPELINE.pipeline as SpikeDetectionPipeline).spikeResults
-
-        val landmarks = mutableListOf<Vector2d>()
-
-        spikes.forEach { spike ->
-            landmarks.add(Vector2d(spike.yaw, spike.pitch)) //hacky but ehh itll work for comp - change back later tho
-        }
-
-        return landmarks
+        return Point(spikeResults.yaw, spikeResults.pitch)
     }
 
 
 
-    fun getSpikeInfo(): List<Vector2d> = getSpikeMarkDetections().map{ it - Vector2d(0.0, CameraData.LOGITECH_C920.pitch) }
+    //fun getSpikeInfo(): List<Vector2d> = getSpikeMarkDetections().map{ it - Vector2d(0.0, CameraData.LOGITECH_C920.pitch) }
 
     val leftSpikeCutoff = -0.35 //TODO verify these values
     val rightSpikeCutoff = 0.0
@@ -245,14 +240,15 @@ class Vision(
         RIGHT()
     }
 
-    var lastSpikeFrame = 0
+    private var lastSpikeFrame = 0
     var spikeLocation = 0.0
     fun getSpikeMarkDirectionUpdate(): SpikeDirection? {
-        if (lastSpikeFrame != webCam.frameCount) {
-            lastSpikeFrame = webCam.frameCount
-            val closestSpike = getSpikeInfo().minByOrNull { it.y }
-            if (closestSpike != null) {
-                val xCoord = closestSpike.x
+        val spike = getSpikeMarkDetection()
+
+        if (spike.y<0.4 && spike.x>-0.4) {
+            if (lastSpikeFrame != webCam.frameCount) {
+                lastSpikeFrame = webCam.frameCount
+                val xCoord = spike.x
                 spikeLocation = xCoord
 
                 return if (xCoord > rightSpikeCutoff) {
@@ -264,7 +260,6 @@ class Vision(
                 }
             }
         }
-
         return null
     }
 

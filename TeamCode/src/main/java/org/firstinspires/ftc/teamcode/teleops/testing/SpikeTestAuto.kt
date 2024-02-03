@@ -29,7 +29,7 @@ class SpikeTestAuto : OpMode() {
         voteCount[Vision.SpikeDirection.RIGHT] = 0
 
         // Store each spike position read
-        val maxReads = 5
+        val maxReads = 25
         while (voteCount.values.sum() < maxReads && autoTimer.seconds() < 5.0) { //TODO make this a safe loop
             val spikeDirectionUpdate = vision.getSpikeMarkDirectionUpdate() ?: continue
             voteCount[spikeDirectionUpdate] = voteCount[spikeDirectionUpdate]!! + 1
