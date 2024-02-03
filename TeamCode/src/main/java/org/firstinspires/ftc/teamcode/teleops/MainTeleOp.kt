@@ -67,7 +67,7 @@ class MainTeleOp  : CommandOpMode() {
         var fieldCentric = true
         val fieldCentricProvider = { fieldCentric }
 
-
+        var autoOpen: Boolean = true
 
         mecanum.defaultCommand = SimpleJoystickDrive(mecanum, input, fieldCentricProvider)
 
@@ -95,6 +95,7 @@ class MainTeleOp  : CommandOpMode() {
                     if ((passthrough.passthroughState.ordinal + 1) < Passthrough.PassthroughState.values().size && lift.isRetracted) {
                         if (passthrough.passthroughState == Passthrough.PassthroughState.HALFWAY) {
                             claw.close()
+                            autoOpen = true
                         }
                         passthrough.setState(Passthrough.PassthroughState.values()[passthrough.passthroughState.ordinal + 1])
                     }
@@ -107,6 +108,10 @@ class MainTeleOp  : CommandOpMode() {
                     if ((passthrough.passthroughState.ordinal - 1) >= 0 && lift.isRetracted) {
                         if (passthrough.passthroughState == Passthrough.PassthroughState.DEPOSIT) {
                             claw.close()
+                        }
+                        if (passthrough.passthroughState == Passthrough.PassthroughState.HALFWAY && autoOpen == true && !passthrough.isInTransit()) {
+                            claw.open()
+                            autoOpen = false
                         }
                         passthrough.setState(Passthrough.PassthroughState.values()[passthrough.passthroughState.ordinal - 1])
                     }
