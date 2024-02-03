@@ -310,7 +310,7 @@ class MainAuto : LinearOpMode() {
                 runBlocking(blueLeftPartOne) // Drives to pixel placement branch
 
                 when (spikePosition) { // Drives to 1 of 3 pixel placement spots depending on vision data
-                    Vision.SpikeDirection.LEFT -> runBlocking(blueLeftPixelLeft) //TODO make and add pixel placement command
+                    Vision.SpikeDirection.LEFT -> runBlocking(blueLeftPixelLeft)
                     Vision.SpikeDirection.CENTER -> runBlocking(blueLeftPixelCenter)
                     Vision.SpikeDirection.RIGHT -> runBlocking(blueLeftPixelRight)
                 }
@@ -324,7 +324,7 @@ class MainAuto : LinearOpMode() {
                 runBlocking(blueLeftPartTwo) // Continues rest of path up to the backdrop
 
                 when (spikePosition) { // Drives to 1 of 3 backdrop placement spots depending on vision data
-                    Vision.SpikeDirection.LEFT -> runBlocking(blueLeftBackdropLeft) //TODO make and add pixel placement command, make vision auto align code(?)
+                    Vision.SpikeDirection.LEFT -> runBlocking(blueLeftBackdropLeft)
                     Vision.SpikeDirection.CENTER -> runBlocking(blueLeftBackdropCenter)
                     Vision.SpikeDirection.RIGHT -> runBlocking(blueLeftBackdropRight)
                 }
@@ -343,7 +343,7 @@ class MainAuto : LinearOpMode() {
                 runBlocking(redLeftPartOne) // Drives to pixel placement branch
 
                 when (spikePosition) { // Drives to 1 of 3 pixel placement spots depending on vision data
-                    Vision.SpikeDirection.LEFT -> runBlocking(redLeftPixelLeft) //TODO make and add pixel placement command
+                    Vision.SpikeDirection.LEFT -> runBlocking(redLeftPixelLeft)
                     Vision.SpikeDirection.CENTER -> runBlocking(redLeftPixelCenter)
                     Vision.SpikeDirection.RIGHT -> runBlocking(redLeftPixelRight)
                 }
@@ -357,7 +357,7 @@ class MainAuto : LinearOpMode() {
                 runBlocking(redLeftPartTwo) // Continues rest of path up to the backdrop
 
                 when (spikePosition) { // Drives to 1 of 3 backdrop placement spots depending on vision data
-                    Vision.SpikeDirection.LEFT -> runBlocking(redLeftBackdropLeft) //TODO make and add pixel placement command, make vision auto align code(?)
+                    Vision.SpikeDirection.LEFT -> runBlocking(redLeftBackdropLeft)
                     Vision.SpikeDirection.CENTER -> runBlocking(redLeftBackdropCenter)
                     Vision.SpikeDirection.RIGHT -> runBlocking(redLeftBackdropRight)
                 }
@@ -375,7 +375,7 @@ class MainAuto : LinearOpMode() {
                 runBlocking(redRightPartOne) // Drives to pixel placement branch
 
                 when (spikePosition) { // Drives to 1 of 3 pixel placement spots depending on vision data
-                    Vision.SpikeDirection.LEFT -> runBlocking(redRightPixelLeft) //TODO make and add pixel placement command
+                    Vision.SpikeDirection.LEFT -> runBlocking(redRightPixelLeft)
                     Vision.SpikeDirection.CENTER -> runBlocking(redRightPixelCenter)
                     Vision.SpikeDirection.RIGHT -> runBlocking(redRightPixelRight)
                 }
@@ -385,11 +385,11 @@ class MainAuto : LinearOpMode() {
                         .splineToLinearHeading(Pose2d(-54.0, 36.0, toRadians(-90.0)), toRadians(90.0))
                         .build()
                 )
-                //TODO
+
                 runBlocking(redRightPartTwo) // Continues rest of path up to the backdrop
 
                 when (spikePosition) { // Drives to 1 of 3 backdrop placement spots depending on vision data
-                    Vision.SpikeDirection.LEFT -> runBlocking(redRightBackdropLeft) //TODO make and add pixel placement command, make vision auto align code(?)
+                    Vision.SpikeDirection.LEFT -> runBlocking(redRightBackdropLeft)
                     Vision.SpikeDirection.CENTER -> runBlocking(redRightBackdropCenter)
                     Vision.SpikeDirection.RIGHT -> runBlocking(redRightBackdropRight)
                 }
