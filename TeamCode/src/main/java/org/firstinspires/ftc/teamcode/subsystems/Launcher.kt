@@ -90,7 +90,7 @@ class Launcher(hwMap: HardwareMap) : SubsystemBase() {
         const val launcherServoName = "launcher"
 
         @JvmField
-        var launcherStartingPosition = 0.9
+        var launcherStartingPosition = 0.78
         @JvmField
         var launchingPosition = 0.4
 

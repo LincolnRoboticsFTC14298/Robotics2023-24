@@ -8,6 +8,7 @@ import com.acmerobotics.roadrunner.Vector2d
 import com.acmerobotics.roadrunner.ftc.runBlocking
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
+import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPose
 import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorage
@@ -15,7 +16,8 @@ import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorag
 
 @Autonomous
 class MainAuto : LinearOpMode() {
-    private var spikePosition: Vision.SpikeDirection = Vision.SpikeDirection.CENTER
+    private var spikePosition: Vision.SpikeDirection = Vision.SpikeDirection.LEFT
+    val autoTimer = ElapsedTime()
 
     override fun runOpMode() {
         val drive = MecanumDriveRR( //TODO check with normal drive subsystem
@@ -23,6 +25,8 @@ class MainAuto : LinearOpMode() {
             StartingPoseStorage.startingPose.pose
         )
         val vision = Vision(hardwareMap)
+
+        autoTimer.reset()
 
         // Trajectories
 
@@ -36,7 +40,7 @@ class MainAuto : LinearOpMode() {
 
         val blueRightPixelLeft = drive.actionBuilder(Pose2d(-45.0, -36.0, toRadians(0.0))) 
             .setTangent(toRadians(-90.0))
-            .splineToLinearHeading(Pose2d(-45.0, -32.5, toRadians(30.0)), toRadians(-90.0))
+            .splineToLinearHeading(Pose2d(-32.0, -39.5, toRadians(90.0)), toRadians(-90.0))
             .build()
 
         val blueRightPixelCenter = drive.actionBuilder(Pose2d(-45.0, -36.0, toRadians(0.0))) 
@@ -51,7 +55,7 @@ class MainAuto : LinearOpMode() {
 
 
         val blueRightPartTwo = drive.actionBuilder(Pose2d(-60.0, -48.0, toRadians(-90.0))) 
-            .setTangent(toRadians(-90.0))
+            .setTangent(toRadians(90.0))
             .splineToConstantHeading(Vector2d(-60.0, 36.0), toRadians(90.0))
             .splineToConstantHeading(Vector2d(-36.0, 36.0), toRadians(0.0))
             .build()
@@ -74,7 +78,7 @@ class MainAuto : LinearOpMode() {
 
 
 
-        //Blue Left
+        //Blue Left - DONE
         val blueLeftPartOne = drive.actionBuilder(drive.pose)
             .setTangent(toRadians(90.0))
             .splineToConstantHeading(Vector2d(-54.0, 24.0), toRadians(45.0))
@@ -233,8 +237,8 @@ class MainAuto : LinearOpMode() {
         voteCount[Vision.SpikeDirection.RIGHT] = 0
 
         // Store each spike position read
-        val maxReads = 7
-        while (voteCount.values.sum() < maxReads) { //TODO make this a safe loop
+        val maxReads = 5
+        while (voteCount.values.sum() < maxReads && autoTimer.seconds() < 5.0) { //TODO make this a safe loop
             val spikeDirectionUpdate = vision.getSpikeMarkDirectionUpdate() ?: continue
             voteCount[spikeDirectionUpdate] = voteCount[spikeDirectionUpdate]!! + 1
             Log.i("Votes", voteCount.toString())

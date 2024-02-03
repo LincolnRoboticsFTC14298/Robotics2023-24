@@ -17,12 +17,7 @@ public class LauncherTestTeleOp extends LinearOpMode{
         waitForStart();
 
         while(opModeIsActive()) {
-            if (gamepad1.a) {
-                position = 0.4;
-            }
-            if (gamepad1.b) {
-                position = 0.9;
-            }
+            position = gamepad1.left_stick_y/2 +0.3;
             servo.setPosition(position);
             telemetry.addData("Position", position);
             telemetry.update();
