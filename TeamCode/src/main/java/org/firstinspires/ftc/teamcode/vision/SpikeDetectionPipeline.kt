@@ -37,7 +37,7 @@ open class SpikeDetectionPipeline(
     private val inputModule = InputModule()
     //private val undistort = UndistortLens(inputModule, camMat, distCoeffs)
     private val labColorSpace = ColorConverter(inputModule, Imgproc.COLOR_RGB2Lab)
-    private val spikeMask: Filter = if(isRedAlliance){Filter(labColorSpace, Scalar(0.0, 154.0, 110.0), Scalar(255.0, 210.0, 190.0))} else {Filter(labColorSpace, Scalar(30.0, 106.0, 50.0), Scalar(180.0, 165.0, 124.0))}
+    private val spikeMask: Filter = if(isRedAlliance){Filter(labColorSpace, Scalar(0.0, 154.0, 110.0), Scalar(255.0, 210.0, 190.0))} else {Filter(labColorSpace, Scalar(120.4, 116.1, 120.8), Scalar(255.0, 127.2, 160.5))}
     private val denoisedSpikeMask = Denoise(spikeMask, 5, 5, 3, 3)
     private val rawSpikeContours = Contours(denoisedSpikeMask)
 
