@@ -4,15 +4,19 @@ import android.util.Log
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.eventloop.opmode.OpMode
+import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.subsystems.Vision
 
 
 @Autonomous
 class SpikeTestAuto : OpMode() {
 
-    private var spikePosition: Vision.SpikeDirection = Vision.SpikeDirection.CENTER
+    private var spikePosition: Vision.SpikeDirection = Vision.SpikeDirection.LEFT
+    val autoTimer = ElapsedTime()
     override fun init() {
         val vision = Vision(hardwareMap)
+
+        autoTimer.reset()
 
         //Start streaming camera
         //vision.startStreamingFrontCamera()
@@ -25,8 +29,8 @@ class SpikeTestAuto : OpMode() {
         voteCount[Vision.SpikeDirection.RIGHT] = 0
 
         // Store each spike position read
-        val maxReads = 7
-        while (voteCount.values.sum() < maxReads) { //TODO make this a safe loop
+        val maxReads = 5
+        while (voteCount.values.sum() < maxReads && autoTimer.seconds() < 5.0) { //TODO make this a safe loop
             val spikeDirectionUpdate = vision.getSpikeMarkDirectionUpdate() ?: continue
             voteCount[spikeDirectionUpdate] = voteCount[spikeDirectionUpdate]!! + 1
             Log.i("Votes", voteCount.toString())

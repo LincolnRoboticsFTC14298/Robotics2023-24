@@ -9,8 +9,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class PassthroughTestTeleOp extends LinearOpMode
 {
     double position;
-    double MAX_POS = 0.6;
-    double MIN_POS = 0.0;
+    double MAX_POS = 0.71;
+    double MIN_POS = 0.08;
     Servo leftServo;
     Servo rightServo;
     @Override

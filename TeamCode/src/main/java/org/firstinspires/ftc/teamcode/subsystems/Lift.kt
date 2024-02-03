@@ -60,6 +60,8 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
 
     var lastPosition: LiftPosition = LiftPosition.LOW
 
+    var isRetracted: Boolean = true
+
     /**
      * @return Target height off the ground in in.
      */
@@ -218,6 +220,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         val targetLength = (height - liftHeightOffset) / sin(toRadians(liftAngle)) // It will be extending upwards so no need to check
         setpoint = targetLength
         checkLimit = false
+        isRetracted = false
     }
     /**
      * Sets the target height of the lift and constructs an optimal motion profile for it.
@@ -239,6 +242,7 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
     fun retract() {
         setpoint = 0.0
         checkLimit = true
+        isRetracted = true
     }
 
     /**
@@ -352,11 +356,11 @@ class Lift(hwMap: HardwareMap, private val voltageSensor: VoltageSensor) : Subsy
         const val liftAngle = 36.98 // deg
 
         @JvmField
-        var lowHeight = 14.0
+        var lowHeight = 16.0
         @JvmField
         var midHeight = 20.0
         @JvmField
-        var highHeight = 25.0
+        var highHeight = 27.0
 
         @JvmField
         var liftMaxVel = 15.0 // in / s  // TODO: Find max values

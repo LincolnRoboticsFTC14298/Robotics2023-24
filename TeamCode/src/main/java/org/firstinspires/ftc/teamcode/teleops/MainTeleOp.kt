@@ -59,10 +59,15 @@ class MainTeleOp  : CommandOpMode() {
         /**
          * Drive
          */
-        val input = { PoseVelocity2d(Vector2d(driver1.leftY, -driver1.leftX), -driver1.rightX) }
+
+        val scaleFactorProvider = { if (lift.isRetracted) 1.0 else 0.3 }
+
+        val input = { PoseVelocity2d(Vector2d(driver1.leftY * scaleFactorProvider.invoke(), -driver1.leftX * scaleFactorProvider.invoke()), -driver1.rightX * 0.5 * (scaleFactorProvider.invoke() * 1.5)) }
 
         var fieldCentric = true
         val fieldCentricProvider = { fieldCentric }
+
+
 
         mecanum.defaultCommand = SimpleJoystickDrive(mecanum, input, fieldCentricProvider)
 
@@ -72,13 +77,13 @@ class MainTeleOp  : CommandOpMode() {
         driver1
             .getGamepadButton(GamepadKeys.Button.B)
             .whenPressed(
-                InstantCommand(claw::incramentOpen, claw),
+                InstantCommand({if(passthrough.passthroughState != Passthrough.PassthroughState.DEPOSIT && !passthrough.isInTransit()) claw.incramentOpen()}, claw),
             )
 
         driver1
             .getGamepadButton(GamepadKeys.Button.A)
             .whenPressed(
-                InstantCommand(claw::incramentClosed, claw)
+                InstantCommand({if(passthrough.passthroughState != Passthrough.PassthroughState.DEPOSIT) claw.incramentClosed()}, claw)
             )
 
 
@@ -86,12 +91,26 @@ class MainTeleOp  : CommandOpMode() {
         driver1
             .getGamepadButton(GamepadKeys.Button.Y)
             .whenPressed(
-                InstantCommand(passthrough::halfway, passthrough)
+                InstantCommand({
+                    if ((passthrough.passthroughState.ordinal + 1) < Passthrough.PassthroughState.values().size && lift.isRetracted) {
+                        if (passthrough.passthroughState == Passthrough.PassthroughState.HALFWAY) {
+                            claw.close()
+                        }
+                        passthrough.setState(Passthrough.PassthroughState.values()[passthrough.passthroughState.ordinal + 1])
+                    }
+                }, passthrough)
             )
         driver1
             .getGamepadButton(GamepadKeys.Button.X)
             .whenPressed(
-                InstantCommand(passthrough::pickUp, passthrough)
+                InstantCommand({
+                    if ((passthrough.passthroughState.ordinal - 1) >= 0 && lift.isRetracted) {
+                        if (passthrough.passthroughState == Passthrough.PassthroughState.DEPOSIT) {
+                            claw.close()
+                        }
+                        passthrough.setState(Passthrough.PassthroughState.values()[passthrough.passthroughState.ordinal - 1])
+                    }
+                }, passthrough)
             )
 
 
@@ -112,12 +131,7 @@ class MainTeleOp  : CommandOpMode() {
             .whenPressed(
                 SequentialCommandGroup(
                     InstantCommand(claw::close, claw),
-                    WaitCommand(200),
-                    InstantCommand(passthrough::halfway, passthrough),
-                    WaitCommand(500),
-                    InstantCommand(lift::retract, lift),
-                    WaitUntilCommand(lift::atTarget),
-                    InstantCommand(claw::open, claw)
+                    InstantCommand(lift::retract, lift)
                 )
             )
 
@@ -160,23 +174,24 @@ class MainTeleOp  : CommandOpMode() {
 
         //release
         Trigger{ driver1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) >= 0.5 }
-            .whenActive(InstantCommand(claw::releaseFirst, claw))
+            .whenActive(InstantCommand({ if (!lift.isRetracted && !passthrough.isInTransit()) claw.releaseFirst() }, claw))
 
         Trigger { driver1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) >= 0.5 }//TriggerReader(driver1, GamepadKeys.Trigger.RIGHT_TRIGGER)::wasJustPressed)
-            .whenActive(InstantCommand(claw::releaseSecond, claw))
+            .whenActive(InstantCommand({ if (!lift.isRetracted && !passthrough.isInTransit()) claw.releaseSecond() }, claw))
 
 
 
         driver1
-            .getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+            .getGamepadButton(GamepadKeys.Button.BACK)
             .whenPressed(
                 InstantCommand(launcher::launch, launcher)
             )
 
-
-
-
-
+        driver1
+            .getGamepadButton(GamepadKeys.Button.START)
+            .whenPressed(
+                InstantCommand({ fieldCentric = !fieldCentric })
+            )
 
     }
 

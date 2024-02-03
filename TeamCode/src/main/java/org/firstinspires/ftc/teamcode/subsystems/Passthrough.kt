@@ -23,7 +23,7 @@ import kotlin.math.sign
  * @param hwMap             HardwareMap
  */
 @Config
-class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalfwayPosition) : SubsystemBase() {
+class Passthrough(hwMap: HardwareMap, startingPosition: PassthroughState = PassthroughState.DEPOSIT) : SubsystemBase() {
 
     /**
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware">FTCLib Docs: Hardware</a>
@@ -46,7 +46,15 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalf
 
     private var displacement: Double = 0.0
 
-    var setpoint: Double = 0.0 //random() / 50.0 //TODO fucking cursed fix later
+    enum class PassthroughState(val pos: Double) {
+        PICKUP(passthroughPickUpPosition),
+        HALFWAY(passthroughHalfwayPosition),
+        DEPOSIT(passthroughDepositPosition)
+    }
+
+    var passthroughState: PassthroughState = PassthroughState.DEPOSIT
+
+    var setpoint: Double = 0.0 //random() / 50.0 //TODO f*cking cursed fix later
         set(position) {
             Log.v("setpoint attempt", setpoint.toString())
             displacement = position - getPositionEstimate()
@@ -65,8 +73,7 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalf
     init {
         servoRight.inverted = true
 
-        setpoint = startingPosition
-        setPosition(startingPosition)  // TODO investigate why passthrough position goes up and down after init
+        setState(startingPosition)  // TODO investigate why passthrough position goes up and down after init
     }
 
     // TODO: check direction of servo
@@ -75,6 +82,15 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalf
         val targetPosition = (setpoint - displacement) + sign(displacement) * motionProfile[timer.seconds()].value()
         setPosition(targetPosition)
         Log.v("Passthrough position estimate", getPositionEstimate().toString())
+    }
+
+    fun setState (pos: Double) {
+        setpoint = pos
+    }
+
+    fun setState (state: PassthroughState) {
+        setState(state.pos)
+        passthroughState = state
     }
 
     fun junctionDeposit() {
@@ -130,13 +146,15 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalf
      * @return If at desired angle based on time.
      */
     fun atTarget(): Boolean {
-        return timer.seconds() - motionProfile.duration > passthroughTimeTolerance
+        return (timer.seconds() - motionProfile.duration) > passthroughTimeTolerance
     }
 
     fun timeToTarget(position: Double) =
         TimeProfile(
             constantProfile(kotlin.math.abs(position - getPositionEstimate()), 0.0, passthroughMaxVel, -passthroughMaxAccel, passthroughMaxAccel).baseProfile
         ).duration
+
+    fun isInTransit(): Boolean = passthroughState != PassthroughState.PICKUP && !atTarget()
 
     /**
      * For debugging/tuning purposes
@@ -149,8 +167,8 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalf
         const val leftPassthroughName = "left"
         const val rightPassthroughName = "right"
 
-        const val passthroughMinPosition = 0.0 // empirically determined servo units
-        const val passthroughMaxPosition = 0.6 // empirically determined servo units
+        const val passthroughMinPosition = 0.07 // empirically determined servo units
+        const val passthroughMaxPosition = 0.71 // empirically determined servo units
 
         const val passthroughOffsetDistanceFromLift = 0.0
 
@@ -159,7 +177,7 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalf
         @JvmField
         var passthroughDepositPosition = passthroughMaxPosition
         @JvmField
-        var passthroughHalfwayPosition = 0.14
+        var passthroughHalfwayPosition = 0.15
         @JvmField
         var passthroughJunctionAngle = -15.0
 
@@ -169,7 +187,7 @@ class Passthrough(hwMap: HardwareMap, startingPosition: Double = passthroughHalf
         var passthroughMaxAccel = 1.0
 
         @JvmField
-        var passthroughTimeTolerance = 0.2 // Seconds to wait after motion profile supposedly complete
+        var passthroughTimeTolerance = 0.01 // Seconds to wait after motion profile supposedly complete
     }
 
 }
