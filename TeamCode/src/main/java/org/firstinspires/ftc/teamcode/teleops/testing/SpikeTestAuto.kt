@@ -40,7 +40,7 @@ class SpikeTestAuto : OpMode() {
         }
 
         // Set spikePosition to the highest voted position
-        spikePosition = voteCount.entries.maxByOrNull {it.value}?.key ?: Vision.SpikeDirection.CENTER
+        spikePosition = voteCount.entries.maxByOrNull {it.value}?.key ?: Vision.SpikeDirection.LEFT
 
         // Stop streaming
         //vision.stopStreamingFrontCamera()
