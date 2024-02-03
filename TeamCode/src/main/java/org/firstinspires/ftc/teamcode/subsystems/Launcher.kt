@@ -58,7 +58,7 @@ class Launcher(hwMap: HardwareMap) : SubsystemBase() {
      * Open to pick up the cone
      */
     fun launch() {
-        if (timer.seconds() > 120.0) {
+        if (timer.seconds() > 90.0) {
             setpoint = launchingPosition
         }
     }
