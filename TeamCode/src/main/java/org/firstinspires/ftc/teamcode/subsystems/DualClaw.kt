@@ -1,22 +1,16 @@
 package org.firstinspires.ftc.teamcode.subsystems
 
-import android.graphics.Color
 import android.util.Log
 import com.acmerobotics.dashboard.canvas.Canvas
 import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket
+import com.acmerobotics.roadrunner.Action
 import com.acmerobotics.roadrunner.Pose2d
-import com.acmerobotics.roadrunner.TimeProfile
 import com.acmerobotics.roadrunner.Vector2d
-import com.acmerobotics.roadrunner.constantProfile
 import com.arcrobotics.ftclib.command.SubsystemBase
 import com.arcrobotics.ftclib.hardware.SimpleServo
 import com.qualcomm.robotcore.hardware.HardwareMap
-import com.qualcomm.robotcore.hardware.NormalizedColorSensor
-import com.qualcomm.robotcore.util.ElapsedTime
 import com.qualcomm.robotcore.util.Range.clip
-import org.firstinspires.ftc.robotcore.external.Telemetry
-import org.firstinspires.ftc.teamcode.FieldConfig
 
 /**
  * Claw subsystem consists of a servo, potentiometer and a color sensor.
@@ -24,7 +18,6 @@ import org.firstinspires.ftc.teamcode.FieldConfig
  */
 @Config
 class DualClaw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition) : SubsystemBase() {
-
     private val servo = SimpleServo(hwMap, clawServoName, 0.0, 360.0)
     //private var colorSensor = hwMap.get(NormalizedColorSensor::class.java, colorSensorName)
 
@@ -49,6 +42,40 @@ class DualClaw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition
             Log.i("Claw desired position", setpoint.toString())
         }
 
+
+    class ClawPartial(private val claw: DualClaw) : Action {
+        override fun run(p: TelemetryPacket): Boolean {
+            claw.setPosition(clawPartiallyOpenedPosition)
+            return false
+        }
+    }
+
+    class ClawOpen(private val claw: DualClaw) : Action {
+        override fun run(p: TelemetryPacket): Boolean {
+            claw.setPosition(clawOpenedPosition)
+            return false
+        }
+    }
+
+    class ClawClose(private val claw: DualClaw) : Action {
+        override fun run(p: TelemetryPacket): Boolean {
+            claw.setPosition(clawClosedPosition)
+            return false
+        }
+    }
+
+
+    // Actions
+    fun clawOpen(): Action {
+        return ClawOpen(this)
+    }
+    fun clawPartial(): Action {
+        return ClawPartial(this)
+    }
+    fun clawClose(): Action {
+        return ClawClose(this)
+    }
+
     init {
         //colorSensor.gain = colorGain.toFloat()
         setpoint = startingPosition
@@ -60,6 +87,10 @@ class DualClaw(hwMap: HardwareMap, startingPosition: Double = clawClosedPosition
         Log.v("Claw estimated angle", getPositionEstimate().toString())
         //servo.position = motionProfile[timer.seconds()].value()
         servo.position = setpoint
+    }
+
+    fun setPosition(pos: Double) {
+        servo.position = pos
     }
 
     fun releaseFirst() {

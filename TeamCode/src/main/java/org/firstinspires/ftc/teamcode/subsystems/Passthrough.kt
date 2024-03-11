@@ -10,7 +10,6 @@ import com.arcrobotics.ftclib.hardware.SimpleServo
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.util.epsilonEquals
-import java.lang.Math.random
 import java.lang.Math.toRadians
 import kotlin.math.cos
 import kotlin.math.sign
@@ -24,6 +23,35 @@ import kotlin.math.sign
  */
 @Config
 class Passthrough(hwMap: HardwareMap, startingPosition: PassthroughState = PassthroughState.DEPOSIT) : SubsystemBase() {
+
+    // Actions
+    class PassthroughDeposit(private val passthrough: Passthrough) : Action {
+        override fun run(p: TelemetryPacket): Boolean {
+            passthrough.deposit()
+            return false
+        }
+    }
+    class PassthroughHalfway(private val passthrough: Passthrough) : Action {
+        override fun run(p: TelemetryPacket): Boolean {
+            passthrough.setPosition(passthroughHalfwayPosition)
+            return false
+        }
+    }
+    class PassthroughPickup(private val passthrough: Passthrough) : Action {
+        override fun run(p: TelemetryPacket): Boolean {
+            passthrough.setPosition(passthroughPickUpPosition)
+            return false
+        }
+    }
+    fun passthroughDeposit(): Action {
+        return PassthroughDeposit(this)
+    }
+    fun passthroughHalfway(): Action {
+        return PassthroughHalfway(this)
+    }
+    fun passthroughPickup(): Action {
+        return PassthroughPickup(this)
+    }
 
     /**
      * @see <a href="https://docs.ftclib.org/ftclib/features/hardware">FTCLib Docs: Hardware</a>

@@ -1,17 +1,25 @@
 package org.firstinspires.ftc.teamcode.teleops.auto
 
 import android.util.Log
-import java.lang.Math.toRadians
-
+import androidx.annotation.NonNull
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket
+import com.acmerobotics.roadrunner.Action
+import com.acmerobotics.roadrunner.InstantAction
 import com.acmerobotics.roadrunner.Pose2d
+import com.acmerobotics.roadrunner.SequentialAction
+import com.acmerobotics.roadrunner.SleepAction
 import com.acmerobotics.roadrunner.Vector2d
 import com.acmerobotics.roadrunner.ftc.runBlocking
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
 import com.qualcomm.robotcore.util.ElapsedTime
+import org.firstinspires.ftc.teamcode.subsystems.DualClaw
+import org.firstinspires.ftc.teamcode.subsystems.Passthrough
 import org.firstinspires.ftc.teamcode.subsystems.Vision
+import org.firstinspires.ftc.teamcode.subsystems.actions.*
 import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPose
 import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorage
+import java.lang.Math.toRadians
 
 
 @Autonomous
@@ -25,6 +33,8 @@ class MainAuto : LinearOpMode() {
             StartingPoseStorage.startingPose.pose
         )
         val vision = Vision(hardwareMap)
+        val passthrough = Passthrough(hardwareMap)
+        val claw = DualClaw(hardwareMap)
 
         autoTimer.reset()
 
@@ -50,11 +60,11 @@ class MainAuto : LinearOpMode() {
 
         val blueRightPixelRight = drive.actionBuilder(Pose2d(-45.0, -36.0, toRadians(0.0))) 
             .setTangent(toRadians(90.0))
-            .splineToLinearHeading(Pose2d(-45.0, -39.5, toRadians(-30.0)), toRadians(90.0))
+            .splineToLinearHeading(Pose2d(-45.0, -40.5, toRadians(-30.0)), toRadians(90.0))
             .build()
 
 
-        val blueRightPartTwo = drive.actionBuilder(Pose2d(-60.0, -48.0, toRadians(-90.0))) 
+        val blueRightPartTwo = drive.actionBuilder(Pose2d(-59.0, -48.0, toRadians(-90.0)))
             .setTangent(toRadians(90.0))
             .splineToConstantHeading(Vector2d(-60.0, 36.0), toRadians(90.0))
             .splineToConstantHeading(Vector2d(-36.0, 36.0), toRadians(0.0))
@@ -88,12 +98,12 @@ class MainAuto : LinearOpMode() {
 
             val blueLeftPixelLeft = drive.actionBuilder(Pose2d(-45.0, 12.0, toRadians(0.0)))
                 .setTangent(toRadians(0.0))
-                .splineToLinearHeading(Pose2d(-45.0, 15.5, toRadians(-90.0)), toRadians(30.0))
+                .splineToLinearHeading(Pose2d(-29.0, 15.5, toRadians(90.0)), toRadians(30.0))
                 .build()
 
             val blueLeftPixelCenter = drive.actionBuilder(Pose2d(-45.0, 12.0, toRadians(0.0)))
                 .setTangent(toRadians(0.0))
-                .splineToLinearHeading(Pose2d(-42.0, 12.0, toRadians(0.0)), toRadians(0.0))
+                .splineToLinearHeading(Pose2d(-39.0, 12.0, toRadians(0.0)), toRadians(0.0))
                 .build()
 
             val blueLeftPixelRight = drive.actionBuilder(Pose2d(-45.0, 12.0, toRadians(0.0)))
@@ -225,6 +235,7 @@ class MainAuto : LinearOpMode() {
             .splineToConstantHeading(Vector2d(60.0, 60.0), toRadians(90.0))
             .build()
 
+
         waitForStart()
 
         if (isStopRequested) return
@@ -249,48 +260,89 @@ class MainAuto : LinearOpMode() {
         // Set spikePosition to the highest voted position
         spikePosition = voteCount.entries.maxByOrNull {it.value}?.key ?: Vision.SpikeDirection.LEFT
 
+        telemetry.addData("Spike Position", spikePosition.name)
+        telemetry.update()
 
-
+        // Initialize claw and passthrough position
+        runBlocking(
+            SequentialAction(
+                claw.clawClose(),
+                passthrough.passthroughDeposit()
+            )
+        )
 
         // Trajectory Decision Tree
         when (StartingPoseStorage.startingPose) {
             StartingPose.BLUE_RIGHT -> {
-                runBlocking(blueRightPartOne) // Drives to pixel placement branch
+                // Drives to pixel placement branching node
+                runBlocking(blueRightPartOne)
 
-                when (spikePosition) { // Drives to 1 of 3 pixel placement spots depending on vision data
-                    Vision.SpikeDirection.LEFT -> runBlocking(blueRightPixelLeft) //TODO make and add pixel placement command
+                // Extend passthrough
+                runBlocking(
+                    SequentialAction(
+                        passthrough.passthroughHalfway(),
+                        SleepAction(1.5)
+                    )
+                )
+
+                // Drives to 1 of 3 pixel placement spots depending on vision data
+                when (spikePosition) {
+                    Vision.SpikeDirection.LEFT -> runBlocking(blueRightPixelLeft)
                     Vision.SpikeDirection.CENTER -> runBlocking(blueRightPixelCenter)
                     Vision.SpikeDirection.RIGHT -> runBlocking(blueRightPixelRight)
                 }
 
-                runBlocking(drive.actionBuilder(drive.pose) // Drives to next node
+                // Pixel placement sequence
+                runBlocking(
+                    SequentialAction(
+                        passthrough.passthroughPickup(), // Place pixel
+                        SleepAction(1.0),
+                        claw.clawPartial(), // Release pixel
+                        SleepAction(1.0),
+                        passthrough.passthroughHalfway(), // Lift passthrough up
+                        SleepAction(0.5),
+                        claw.clawClose(), // Close claw
+                        passthrough.passthroughDeposit(), // Retract Passthrough
+                        SleepAction(2.0)
+                    )
+                )
+
+                // Converges branched nodes
+                runBlocking(drive.actionBuilder(drive.pose)
                     .setTangent(toRadians(-135.0))
-                    .splineToLinearHeading(Pose2d(-60.0, -48.0, toRadians(-90.0)), toRadians(-90.0))
+                    .splineToLinearHeading(Pose2d(-59.0, -48.0, toRadians(-90.0)), toRadians(-90.0))
                     .build()
                 )
 
-                runBlocking(blueRightPartTwo) // Continues rest of path up to the backdrop
+                // Continues from node convergence to backdrop branch
+                runBlocking(blueRightPartTwo)
 
-                when (spikePosition) { // Drives to 1 of 3 backdrop placement spots depending on vision data
-                    Vision.SpikeDirection.LEFT -> runBlocking(blueRightBackdropLeft) //TODO make and add pixel placement command, make vision auto align code(?)
+                // Drives to 1 of 3 backdrop placement spots depending on vision data
+                when (spikePosition) {
+                    Vision.SpikeDirection.LEFT -> runBlocking(blueRightBackdropLeft)
                     Vision.SpikeDirection.CENTER -> runBlocking(blueRightBackdropCenter)
                     Vision.SpikeDirection.RIGHT -> runBlocking(blueRightBackdropRight)
                 }
 
-                runBlocking(drive.actionBuilder(drive.pose) // Drives to next node
+                //TODO add actions, lift actions, vision auto align?
+
+                // Converges to parking node
+                runBlocking(drive.actionBuilder(drive.pose)
                     .setTangent(toRadians(90.0))
                     .splineToLinearHeading(Pose2d(-36.0, 36.0, toRadians(-90.0)), toRadians(90.0))
                     .build()
                 )
 
-                runBlocking(bluePartThreeLeft) // Finish path
-
+                // Finish path and park
+                runBlocking(bluePartThreeLeft) //TODO make option in starting pose selector to pick parking location
             }
-
-//            Should work???
 
             StartingPose.BLUE_LEFT -> {
                 runBlocking(blueLeftPartOne) // Drives to pixel placement branch
+
+                runBlocking(passthrough.passthroughHalfway())
+                runBlocking(drive.actionBuilder(drive.pose).waitSeconds(2.0).build()) // Wait for passthrough to extend
+
 
                 when (spikePosition) { // Drives to 1 of 3 pixel placement spots depending on vision data
                     Vision.SpikeDirection.LEFT -> runBlocking(blueLeftPixelLeft) //TODO make and add pixel placement command
@@ -298,12 +350,19 @@ class MainAuto : LinearOpMode() {
                     Vision.SpikeDirection.RIGHT -> runBlocking(blueLeftPixelRight)
                 }
 
+                runBlocking(passthrough.passthroughPickup())
+                runBlocking(drive.actionBuilder(drive.pose).waitSeconds(1.0).build()) // Wait for passthrough to extend
+                runBlocking(claw.clawPartial())
+                runBlocking(passthrough.passthroughHalfway())
+                runBlocking(drive.actionBuilder(drive.pose).waitSeconds(1.0).build()) // Wait for passthrough to extend
+
+
                 runBlocking(drive.actionBuilder(drive.pose) // Drives to next node
                         .setTangent(toRadians(135.0))
                         .splineToLinearHeading(Pose2d(-54.0, 36.0, toRadians(-90.0)), toRadians(90.0))
                         .build()
                 )
-                //TODO
+
                 runBlocking(blueLeftPartTwo) // Continues rest of path up to the backdrop
 
                 when (spikePosition) { // Drives to 1 of 3 backdrop placement spots depending on vision data
