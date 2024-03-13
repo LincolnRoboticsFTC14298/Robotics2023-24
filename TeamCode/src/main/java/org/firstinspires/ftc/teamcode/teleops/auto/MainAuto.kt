@@ -22,6 +22,8 @@ import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorag
 import java.lang.Math.toRadians
 
 
+//TODO test and double check tangents (I'm pretty sure I screwed some of them up (polarity) also some them I found were screwed up)
+
 @Autonomous
 class MainAuto : LinearOpMode() {
     private var spikePosition: Vision.SpikeDirection = Vision.SpikeDirection.LEFT
@@ -77,7 +79,7 @@ class MainAuto : LinearOpMode() {
             .build()
 
         val blueRightBackdropCenter = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0)))
-            .setTangent(toRadians(90.0))
+            .setTangent(toRadians(-90.0))
             .splineToConstantHeading(Vector2d(-36.0, 40.0), toRadians(90.0))
             .build()
 
@@ -123,7 +125,7 @@ class MainAuto : LinearOpMode() {
                 .build()
 
         val blueLeftBackdropCenter = drive.actionBuilder(Pose2d(-36.0, 36.0, toRadians(-90.0)))
-                .setTangent(toRadians(90.0))
+                .setTangent(toRadians(-90.0))
                 .splineToConstantHeading(Vector2d(-36.0, 40.0), toRadians(90.0))
                 .build()
 
@@ -151,56 +153,51 @@ class MainAuto : LinearOpMode() {
 
         //Red Left
         val redLeftPartOne = drive.actionBuilder(drive.pose)
-            .setTangent(toRadians(-90.0))
-            .splineToConstantHeading(Vector2d(57.0, -42.0), toRadians(180.0))
-            .splineToLinearHeading(Pose2d(45.0, -36.0, toRadians(180.0)), toRadians(0.0))
-            .build()
-
-            val redLeftPixelLeft = drive.actionBuilder(Pose2d(45.0, -36.0, toRadians(180.0)))
                 .setTangent(toRadians(-90.0))
-                .splineToLinearHeading(Pose2d(30.0, -39.5, toRadians(90.0)), toRadians(0.0))
+                .splineToConstantHeading(Vector2d(57.0, -42.0), toRadians(180.0))
+                .splineToLinearHeading(Pose2d(45.0, -36.0, toRadians(180.0)), toRadians(0.0))
                 .build()
 
-            val redLeftPixelCenter = drive.actionBuilder(Pose2d(45.0, -36.0, toRadians(180.0)))
+
+        val redLeftPixelLeft = drive.actionBuilder(Pose2d(45.0, -36.0, toRadians(180.0)))
+                .setTangent(toRadians(-90.0))
+                .splineToLinearHeading(Pose2d(45.0, -32.5, toRadians(150.0)), toRadians(-90.0))
+                .build()
+
+        val redLeftPixelCenter = drive.actionBuilder(Pose2d(45.0, -36.0, toRadians(180.0)))
                 .setTangent(toRadians(0.0))
-                .splineToLinearHeading(Pose2d(39.5, -36.0, toRadians(180.0)), toRadians(0.0))
+                .splineToLinearHeading(Pose2d(42.0, -36.0, toRadians(0.0)), toRadians(0.0))
                 .build()
 
-            val redLeftPixelRight = drive.actionBuilder(Pose2d(45.0, -36.0, toRadians(180.0)))
+        val redLeftPixelRight = drive.actionBuilder(Pose2d(45.0, -36.0, toRadians(180.0)))
                 .setTangent(toRadians(90.0))
-                .splineToLinearHeading(Pose2d(30.0, -36.0, toRadians(-90.0)), toRadians(0.0))
-                .splineToConstantHeading(Vector2d(30.0, -32.50), toRadians(-90.0))
+                .splineToLinearHeading(Pose2d(45.0, -39.5, toRadians(-150.0)), toRadians(-90.0))
                 .build()
 
-        val redLeftPartTwo = drive.actionBuilder(drive.pose)
-            .setTangent(toRadians(180.0))
-            .splineToLinearHeading(Pose2d(48.0, -48.0, toRadians(-90.0)), toRadians(180.0))
-            .splineToConstantHeading(Vector2d(60.0, -48.0), toRadians(90.0))
-            .splineToConstantHeading(Vector2d(60.0, 12.0), toRadians(90.0))
-            .splineToLinearHeading(Pose2d(36.0, 36.0, toRadians(-90.0)), toRadians(90.0))
-            .build()
 
-        val redLeftBackdropLeft = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
+        val redLeftPartTwo = drive.actionBuilder(Pose2d(60.0, -48.0, toRadians(-90.0)))
+                .setTangent(toRadians(90.0))
+                .splineToConstantHeading(Vector2d(60.0, 36.0), toRadians(90.0))
+                .splineToConstantHeading(Vector2d(36.0, 36.0), toRadians(180.0))
+                .build()
+
+
+        val redLeftBackdropLeft = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(90.0)))
                 .setTangent(toRadians(180.0))
-                .splineToConstantHeading(Vector2d(40.0, 40.0), toRadians(0.0))
+                .splineToConstantHeading(Vector2d(32.0, 40.0), toRadians(-90.0))
                 .build()
 
-        val redLeftBackdropCenter = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
-                .setTangent(toRadians(90.0))
-                .splineToConstantHeading(Vector2d(36.0, 40.0), toRadians(0.0))
+        val redLeftBackdropCenter = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(90.0)))
+                .setTangent(toRadians(-90.0))
+                .splineToConstantHeading(Vector2d(36.0, 40.0), toRadians(-90.0))
                 .build()
 
-        val redLeftBackdropRight = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
+        val redLeftBackdropRight = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(90.0)))
                 .setTangent(toRadians(0.0))
-                .splineToConstantHeading(Vector2d(32.0, 40.0), toRadians(0.0))
+                .splineToConstantHeading(Vector2d(40.0, 40.0), toRadians(-90.0))
+                .build()
 
-        val redLeftPartThree = drive.actionBuilder(drive.pose)
-            .setTangent(toRadians(90.0))
-            .splineToConstantHeading(Vector2d(60.0, 48.0), toRadians(90.0))
-            .splineToConstantHeading(Vector2d(60.0, 60.0), toRadians(90.0))
-            .build()
-
-
+        
         //Red Right
         val redRightPartOne = drive.actionBuilder(drive.pose)
             .setTangent(toRadians(90.0))
@@ -209,31 +206,58 @@ class MainAuto : LinearOpMode() {
             .splineToConstantHeading(Vector2d(45.0, 12.0), toRadians(90.0))
             .build()
 
-            val redRightPixelLeft = drive.actionBuilder(drive.pose)
-                .setTangent(toRadians(0.0))
-                .splineToLinearHeading(Pose2d(30.0, 15.5, toRadians(-90.0)), toRadians(180.0))
-                .build()
-
-            val redRightPixelCenter = drive.actionBuilder(drive.pose)
+        val redRightPixelLeft = drive.actionBuilder(Pose2d(45.0, 12.0, toRadians(-180.0)))
                 .setTangent(toRadians(90.0))
-                .splineToLinearHeading(Pose2d(39.5, 12.0, toRadians(180.0)), toRadians(180.0))
+                .splineToLinearHeading(Pose2d(45.0, 15.5, toRadians(150.0)), toRadians(90.0))
                 .build()
 
-            val redRightPixelRight = drive.actionBuilder(drive.pose)
+        val redRightPixelCenter = drive.actionBuilder(Pose2d(45.0, 12.0, toRadians(-180.0)))
+                .setTangent(toRadians(0.0))
+                .splineToLinearHeading(Pose2d(42.0, 12.0, toRadians(0.0)), toRadians(0.0))
+                .build()
+
+        val redRightPixelRight = drive.actionBuilder(Pose2d(45.0, 12.0, toRadians(-180.0)))
+                .setTangent(toRadians(-90.0))
+                .splineToLinearHeading(Pose2d(45.0, 8.5, toRadians(-150.0)), toRadians(90.0))
+                .build()
+
+        val redRightPartTwo = drive.actionBuilder(Pose2d(54.0, 36.0, toRadians(-90.0)))
+                .setTangent(toRadians(90.0))
+                .splineToConstantHeading(Vector2d(36.0, 36.0), toRadians(90.0))
+                .build()
+
+
+        val redRightBackdropLeft = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
                 .setTangent(toRadians(180.0))
-                .splineToLinearHeading(Pose2d(30.0, 12.0, toRadians(90.0)), toRadians(180.0))
-                .splineToConstantHeading(Vector2d(30.0, 8.50), toRadians(0.0))
+                .splineToConstantHeading(Vector2d(32.0, 40.0), toRadians(90.0))
                 .build()
 
-        val redRightPartTwo = drive.actionBuilder(drive.pose)
-            .splineToLinearHeading(Pose2d(54.0, 36.0, toRadians(-90.0)), toRadians(90.0))
-            .splineToConstantHeading(Vector2d(36.0, 36.0), toRadians(90.0))
-            .build()
+        val redRightBackdropCenter = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
+                .setTangent(toRadians(90.0))
+                .splineToConstantHeading(Vector2d(36.0, 40.0), toRadians(90.0))
+                .build()
 
-        val redRightPartThree = drive.actionBuilder(drive.pose)
-            .splineToConstantHeading(Vector2d(60.0, 48.0), toRadians(90.0))
-            .splineToConstantHeading(Vector2d(60.0, 60.0), toRadians(90.0))
-            .build()
+        val redRightBackdropRight = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
+                .setTangent(toRadians(180.0))
+                .splineToConstantHeading(Vector2d(32.0, 40.0), toRadians(90.0))
+                .build()
+
+
+        //Red Part Three Left
+        val redPartThreeLeft = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
+                .setTangent(toRadians(90.0))  //Idk if you need this
+                .splineToConstantHeading(Vector2d(60.0, 48.0), toRadians(90.0))
+                .splineToConstantHeading(Vector2d(60.0, 60.0), toRadians(90.0))
+                .build()
+
+
+
+        //Red Part Three Right
+        val redPartThreeRight = drive.actionBuilder(Pose2d(36.0, 36.0, toRadians(-90.0)))
+                .setTangent(toRadians(90.0))  //Idk if you need this
+                .splineToConstantHeading(Vector2d(12.0, 48.0), toRadians(90.0))
+                .splineToConstantHeading(Vector2d(12.0, 60.0), toRadians(90.0))
+                .build()
 
 
         waitForStart()

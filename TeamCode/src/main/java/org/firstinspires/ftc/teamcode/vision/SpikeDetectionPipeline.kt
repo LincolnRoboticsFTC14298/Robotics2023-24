@@ -5,6 +5,12 @@ import org.firstinspires.ftc.teamcode.subsystems.Vision
 import org.firstinspires.ftc.teamcode.vision.modulelib.InputModule
 import org.firstinspires.ftc.teamcode.vision.modulelib.ModularPipeline
 import org.firstinspires.ftc.teamcode.vision.modules.*
+import org.firstinspires.ftc.teamcode.vision.modules.features.AspectRatio
+import org.firstinspires.ftc.teamcode.vision.modules.features.Convexity
+import org.firstinspires.ftc.teamcode.vision.modules.features.Extent
+import org.firstinspires.ftc.teamcode.vision.modules.features.Solidity
+import org.firstinspires.ftc.teamcode.vision.modules.scorers.DiffSquaredScorer
+import org.firstinspires.ftc.teamcode.vision.modules.scorers.plus
 import org.opencv.core.Mat
 import org.opencv.core.Point
 import org.opencv.core.Scalar
@@ -36,6 +42,7 @@ open class SpikeDetectionPipeline(
     private val denoisedSpikeMask = Denoise(spikeMask, 15, 15, 3, 3)
 //    private val rawSpikeContours = Contours(denoisedSpikeMask)
 //
+//OLD VALUES
 //    // Spike Mark Scorer //
 //    private val spikeConvexityScorer = DiffSquaredScorer(Convexity(), 0.988, 11.09)
 //    private val spikeExtentScorer = DiffSquaredScorer(Extent(), 0.661, 0.036)
@@ -43,6 +50,16 @@ open class SpikeDetectionPipeline(
 //    private val spikeAspectRatioScorer = DiffSquaredScorer(AspectRatio(), 1.369, 0.23)
 //    private val spikeContours = FilterContours(rawSpikeContours, 0.05, spikeConvexityScorer + spikeExtentScorer + spikeSolidityScorer + spikeAspectRatioScorer)
 
+//NEW VALUES
+//    // Spike Mark Scorer //
+//    private val spikeConvexityScorer = DiffSquaredScorer(Convexity(), 0.97, 7.7)
+//    private val spikeExtentScorer = DiffSquaredScorer(Extent(), 0.87, 8.3)
+//    private val spikeSolidityScorer = DiffSquaredScorer(Solidity(), 0.97, 1.15)
+//    private val spikeAspectRatioScorer = DiffSquaredScorer(AspectRatio(), 1.2, 9.4)
+//    private val spikeContours = FilterContours(rawSpikeContours, 0.05, spikeConvexityScorer + spikeExtentScorer + spikeSolidityScorer + spikeAspectRatioScorer)
+
+
+    
     // Results Modules //
     //private val spikeResultsModule = ContourResults(spikeContours, camera, poleDiameter, poleBaseHeight) //TODO MEASURE AND CHANGE OFFSETS
     private val spikeResultsModule = BlobResults(spikeMask, camera)
