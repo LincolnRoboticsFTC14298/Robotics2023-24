@@ -22,8 +22,9 @@ import org.firstinspires.ftc.teamcode.subsystems.localization.StartingPoseStorag
 import java.lang.Math.toRadians
 
 
-//TODO test and double check tangents (I'm pretty sure I screwed some of them up (polarity) also some them I found were screwed up)
-
+//TODO test autos!
+//TODO double check tangents (I'm pretty sure I screwed some of them up (polarity) also some them I found were screwed up)
+//TODO just double check everything in general ig
 @Autonomous
 class MainAuto : LinearOpMode() {
     private var spikePosition: Vision.SpikeDirection = Vision.SpikeDirection.LEFT
